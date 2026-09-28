@@ -21,6 +21,7 @@ import torch
 from transformers import AutoModel, AutoVideoProcessor
 
 MODEL_ID = "facebook/vjepa2-vitl-fpc64-256"
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 FRAMES_PER_CLIP = 64  # model's native fpc; also the docx's primary-input frame count
 NUM_SPATIAL_PATCHES = (256 // 16) ** 2  # 256
 NUM_TEMPORAL_TUBELETS = FRAMES_PER_CLIP // 2  # tubelet_size=2 -> 32
@@ -61,9 +62,11 @@ def main():
     print(f"Encoding {len(rows)} accepted clips with {MODEL_ID}")
 
     processor = AutoVideoProcessor.from_pretrained(MODEL_ID, cache_dir=args.cache_dir)
-    model = AutoModel.from_pretrained(MODEL_ID, cache_dir=args.cache_dir)
+    model = AutoModel.from_pretrained(MODEL_ID, cache_dir=args.cache_dir).to(DEVICE)
     model.eval()
-    torch.set_num_threads(os.cpu_count() or 4)
+    if DEVICE == "cpu":
+        torch.set_num_threads(os.cpu_count() or 4)
+    print(f"device: {DEVICE}")
     whash = weights_hash(model)
     print("weights_hash:", whash)
 
@@ -76,12 +79,17 @@ def main():
         clip64 = subsample_64(frames)  # [64, 256, 256, 3]
 
         inputs = processor(list(clip64), return_tensors="pt")
+        inputs = {k: v.to(DEVICE) for k, v in inputs.items()}
+        if DEVICE == "cuda":
+            torch.cuda.synchronize()
         t0 = time.time()
         with torch.no_grad():
             out = model(**inputs)
+        if DEVICE == "cuda":
+            torch.cuda.synchronize()
         dt = time.time() - t0
 
-        tokens = out.last_hidden_state[0]  # [8192, 1024]
+        tokens = out.last_hidden_state[0].cpu()  # [8192, 1024]
         tokens = tokens.view(NUM_TEMPORAL_TUBELETS, NUM_SPATIAL_PATCHES, -1)  # [32, 256, 1024]
         temporal_vecs = tokens.mean(dim=1)  # [32, 1024], spatial-mean per tubelet
         feature = temporal_vecs.flatten().numpy().astype(np.float32)  # [32768]
