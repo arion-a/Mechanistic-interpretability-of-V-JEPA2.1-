@@ -1,0 +1,9 @@
+# Downloaded model weights (multi-GB, fetch via huggingface_hub, not git)
+hf_cache/
+
+# Generated simulation/render/encoding artifacts (regenerable from sim/*.py)
+data/
+
+# Python
+__pycache__/
+*.pyc
