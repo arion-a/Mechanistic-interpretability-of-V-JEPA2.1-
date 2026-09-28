@@ -7,3 +7,6 @@ data/
 # Python
 __pycache__/
 *.pyc
+
+# Run logs
+*_log.txt
