@@ -22,19 +22,20 @@ import numpy as np
 
 N_ENCODER_FRAMES = 64  # matches encode/encode_pilot.py's extraction contract
 
-# Must stay in sync with sim/render.py's CAMERA_* constants (v3 calibration:
-# bounded trajectory envelope after shrinking sample_anchor's speed range and
-# adding ROLLING_FRICTION in world.py - see render.py's calibration history
-# comment). Recompute via p.computeViewMatrixFromYawPitchRoll(...) + np.linalg.inv
-# if those constants ever change; Blender's bundled Python has no pybullet to
-# compute this matrix directly.
+# Must stay in sync with sim/render.py's CAMERA_* constants (v4 calibration:
+# shallow -15deg elevation so vertical bounce motion projects onto vertical
+# screen motion instead of being compressed by a steep top-down angle - see
+# render.py's calibration history comment). Recompute via
+# p.computeViewMatrixFromYawPitchRoll(...) + np.linalg.inv if those constants
+# ever change; Blender's bundled Python has no pybullet to compute this
+# matrix directly.
 CAMERA_TO_WORLD = [
-    [7.07106771e-01, -5.99660558e-01, 3.74709513e-01, 3.18503112e+00],
-    [7.07106756e-01, 5.99660474e-01, -3.74709535e-01, -3.18503119e+00],
-    [1.78712760e-08, 5.29919266e-01, 8.48048061e-01, 7.45840866e+00],
+    [7.07106819e-01, -1.83012700e-01, 6.83012650e-01, 6.14711334e+00],
+    [7.07106708e-01, 1.83012675e-01, -6.83012718e-01, -6.14711385e+00],
+    [3.19944936e-08, 9.65925786e-01, 2.58819025e-01, 2.92937100e+00],
     [0.0, 0.0, 0.0, 1.0],
 ]
-FOV_DEG = 34.0
+FOV_DEG = 30.0
 SPHERE_RADIUS = 0.15
 
 

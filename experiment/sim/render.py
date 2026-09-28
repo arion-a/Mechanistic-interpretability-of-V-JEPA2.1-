@@ -19,17 +19,22 @@ IMAGE_SIZE = 256  # matches the V-JEPA 2 ViT-L/16-256 checkpoint's crop_size
 # v2 widened the camera to cover the full ~8m excursion, which technically
 # passed the in-frame check but made the sphere only ~5px across (<1/3 of one
 # ViT patch) - resolvable-in-NDC is not the same as resolvable-in-detail, and
-# that gap wasn't caught until real rendered output was inspected. v3 (this
-# one) instead bounds the excursion itself: sample_anchor's speed range was
-# shrunk and a small ROLLING_FRICTION added (see world.py), cutting worst-case
-# excursion from ~8-11m to ~2.75m. This camera is calibrated to that bounded
-# envelope (100% in-frame across 60 worlds x 9 clips x 180 frames), giving a
-# sphere ~23px across - a real, not just nominal, improvement.
+# that gap wasn't caught until real rendered output was inspected. v3 bounded
+# the excursion itself (shrunk speed range + rolling friction), cutting
+# worst-case excursion to ~2.75m and getting the sphere to ~23px - but at a
+# steep elevation (-58deg, near top-down), which compressed the real vertical
+# bounce motion into only ~14px of screen space: physically correct bounces
+# (confirmed against the analytic free-fall equations) that didn't visually
+# read as bouncing. v4 (this one) uses a much shallower elevation (-15deg,
+# closer to side-on) so vertical motion projects onto vertical screen motion
+# properly: measured 132px of bounce excursion for a single clip (vs ~14px at
+# -58deg) while keeping 100% coverage across 80 worlds and sphere ~24px -
+# same resolvability, dramatically more visible motion.
 CAMERA_AZIMUTH_DEG = 45.0
-CAMERA_ELEVATION_DEG = -58.0  # pybullet elevation is negative-down convention
-CAMERA_DISTANCE = 8.5
-CAMERA_TARGET = [0.0, 0.0, 0.25]
-CAMERA_FOV_DEG = 34.0
+CAMERA_ELEVATION_DEG = -15.0  # pybullet elevation is negative-down convention
+CAMERA_DISTANCE = 9.0
+CAMERA_TARGET = [0.0, 0.0, 0.6]
+CAMERA_FOV_DEG = 30.0
 
 
 _VIEW_MATRIX = p.computeViewMatrixFromYawPitchRoll(
