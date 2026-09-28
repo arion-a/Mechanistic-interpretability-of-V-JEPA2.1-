@@ -35,7 +35,9 @@ PHYSICAL_FACTORS = {
     "restitution": {"low": 0.3, "high": 0.8},
     "friction": {"low": 0.1, "high": 0.4},
 }
-VELOCITY_DELTA = 0.5  # m/s, added along initial horizontal heading
+VELOCITY_DELTA = 0.15  # m/s, added along initial horizontal heading (deviation, see sample_anchor)
+ROLLING_FRICTION = 0.02  # deviation from docx's rf=0: bounds worst-case excursion, applied
+# identically across all conditions so it never confounds the sliding-friction (BASELINE_MU) intervention
 
 
 def derive_seed(root_seed: int, role: str, index: int) -> int:
@@ -71,7 +73,14 @@ def sample_anchor(root_seed: int, base_world_index: int) -> AnchorState:
         y0=float(rng.uniform(-0.5, 0.5)),
         z0=float(rng.uniform(1.5, 2.5)),
         heading=float(rng.uniform(0.0, 2 * np.pi)),
-        horizontal_speed=float(rng.uniform(1.0, 2.0)),
+        # DEVIATION from docx spec (1.0-2.0 m/s): a fixed non-tracking camera
+        # cannot both keep the full trajectory excursion in frame AND resolve
+        # the sphere at a useful pixel size - measured real excursion at the
+        # docx's original ranges reached 8-11m (with the velocity intervention),
+        # leaving the sphere ~5px across (<1/3 of one ViT patch). Shrinking the
+        # speed range bounds worst-case excursion to ~2.75m, sphere ~19px.
+        # See experiment/remote/ for the PyBullet measurements behind this.
+        horizontal_speed=float(rng.uniform(0.3, 0.6)),
         vz0=float(rng.uniform(-0.5, 0.5)),
     )
 
@@ -126,7 +135,7 @@ def run_episode(anchor: AnchorState, spec: InterventionSpec, physics_client: int
 
     plane_id = p.loadURDF("plane.urdf", physicsClientId=physics_client)
     p.changeDynamics(plane_id, -1, restitution=spec.e, lateralFriction=spec.mu,
-                      rollingFriction=0.0, spinningFriction=0.0,
+                      rollingFriction=ROLLING_FRICTION, spinningFriction=ROLLING_FRICTION,
                       physicsClientId=physics_client)
 
     col_shape = p.createCollisionShape(p.GEOM_SPHERE, radius=SPHERE_RADIUS, physicsClientId=physics_client)
@@ -140,8 +149,8 @@ def run_episode(anchor: AnchorState, spec: InterventionSpec, physics_client: int
         physicsClientId=physics_client,
     )
     p.changeDynamics(body_id, -1, restitution=spec.e, lateralFriction=spec.mu,
-                      rollingFriction=0.0, spinningFriction=0.0, linearDamping=0.0,
-                      angularDamping=0.0, physicsClientId=physics_client)
+                      rollingFriction=ROLLING_FRICTION, spinningFriction=ROLLING_FRICTION,
+                      linearDamping=0.0, angularDamping=0.0, physicsClientId=physics_client)
 
     vx0 = anchor.vx0 + spec.velocity_delta * np.cos(anchor.heading)
     vy0 = anchor.vy0 + spec.velocity_delta * np.sin(anchor.heading)

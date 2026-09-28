@@ -22,13 +22,19 @@ import numpy as np
 
 N_ENCODER_FRAMES = 64  # matches encode/encode_pilot.py's extraction contract
 
+# Must stay in sync with sim/render.py's CAMERA_* constants (v3 calibration:
+# bounded trajectory envelope after shrinking sample_anchor's speed range and
+# adding ROLLING_FRICTION in world.py - see render.py's calibration history
+# comment). Recompute via p.computeViewMatrixFromYawPitchRoll(...) + np.linalg.inv
+# if those constants ever change; Blender's bundled Python has no pybullet to
+# compute this matrix directly.
 CAMERA_TO_WORLD = [
-    [7.07106741e-01, -5.00000092e-01, 5.00000007e-01, 4.49999996e+00],
-    [7.07106846e-01, 5.00000007e-01, -4.99999923e-01, -9.79999944e+00],
-    [1.49011584e-08, 7.07106762e-01, 7.07106825e-01, 1.17137083e+01],
+    [7.07106771e-01, -5.99660558e-01, 3.74709513e-01, 3.18503112e+00],
+    [7.07106756e-01, 5.99660474e-01, -3.74709535e-01, -3.18503119e+00],
+    [1.78712760e-08, 5.29919266e-01, 8.48048061e-01, 7.45840866e+00],
     [0.0, 0.0, 0.0, 1.0],
 ]
-FOV_DEG = 85.0
+FOV_DEG = 34.0
 SPHERE_RADIUS = 0.15
 
 

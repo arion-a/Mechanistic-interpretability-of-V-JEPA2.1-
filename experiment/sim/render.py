@@ -13,19 +13,23 @@ import pybullet as p
 
 IMAGE_SIZE = 256  # matches the V-JEPA 2 ViT-L/16-256 checkpoint's crop_size
 
-# Calibration note (pilot finding, see M1 observability gate in the agenda doc):
-# the doc's nominal camera (azimuth 45, elevation 25, aimed at floor center,
-# implied distance ~4.5m) keeps only ~59% of frames in view. With
-# rollingFriction=0 (as specified) the sphere never stops rolling and its
-# horizontal displacement over the full 6s clip reaches several meters, well
-# beyond a tight framing. Recalibrated empirically against this pilot's own
-# trajectory envelope (see sim/calibrate_camera.py) to keep 100% of sampled
-# frames in-frame while preserving the specified 45-degree azimuth.
+# Calibration history (see M1 observability gate in the agenda doc):
+# v1 (azimuth 45, elevation 25, ~4.5m) kept only ~59% of frames in view with
+# rollingFriction=0 letting the sphere roll indefinitely once past sliding.
+# v2 widened the camera to cover the full ~8m excursion, which technically
+# passed the in-frame check but made the sphere only ~5px across (<1/3 of one
+# ViT patch) - resolvable-in-NDC is not the same as resolvable-in-detail, and
+# that gap wasn't caught until real rendered output was inspected. v3 (this
+# one) instead bounds the excursion itself: sample_anchor's speed range was
+# shrunk and a small ROLLING_FRICTION added (see world.py), cutting worst-case
+# excursion from ~8-11m to ~2.75m. This camera is calibrated to that bounded
+# envelope (100% in-frame across 60 worlds x 9 clips x 180 frames), giving a
+# sphere ~23px across - a real, not just nominal, improvement.
 CAMERA_AZIMUTH_DEG = 45.0
-CAMERA_ELEVATION_DEG = -45.0  # pybullet elevation is negative-down convention
-CAMERA_DISTANCE = 16.0
-CAMERA_TARGET = [-3.5, -1.8, 0.4]
-CAMERA_FOV_DEG = 85.0
+CAMERA_ELEVATION_DEG = -58.0  # pybullet elevation is negative-down convention
+CAMERA_DISTANCE = 8.5
+CAMERA_TARGET = [0.0, 0.0, 0.25]
+CAMERA_FOV_DEG = 34.0
 
 
 _VIEW_MATRIX = p.computeViewMatrixFromYawPitchRoll(
