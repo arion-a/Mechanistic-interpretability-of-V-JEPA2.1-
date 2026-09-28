@@ -1,23 +1,18 @@
 """Build a self-contained HTML dashboard from the pilot analysis results.
 
-Reads data/pilot/manifest.json + results/pilot_analysis.json (+ a couple of
-real rendered frames for grounding) and emits a static HTML report. No chart
-library: axes/lines/bars/heatmap are plain inline SVG computed here, sized to
-the real data so labels always match ticks the chart reaches.
+Reads data/final_pilot/manifest.json + results/final_pilot/pilot_analysis.json
+(+ a couple of real rendered sample clips for grounding) and emits a static
+HTML report. No chart library: axes/lines/bars/heatmap are plain inline SVG
+computed here, sized to the real data so labels always match ticks the chart
+reaches.
 """
 from __future__ import annotations
 
 import base64
-import io
 import json
 import os
-import sys
 
 import numpy as np
-from PIL import Image
-
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sim"))
-import render as render_mod  # noqa: E402 - reuses the exact camera matrices used for analysis
 
 # Reference categorical palette (dataviz skill), fixed hue order, factor-slot mapping
 FACTOR_COLORS = {
@@ -29,61 +24,11 @@ FACTOR_COLORS = {
 FACTOR_ORDER = ["gravity", "restitution", "friction", "velocity"]
 
 
-def world_to_pixel(pos: np.ndarray, image_size: int) -> tuple[float, float] | None:
-    """Project a world-space point to pixel coords using the exact analysis camera."""
-    V = np.array(render_mod._VIEW_MATRIX).reshape(4, 4, order="F")
-    P = np.array(render_mod._PROJ_MATRIX).reshape(4, 4, order="F")
-    homog = np.append(pos, 1.0)
-    clip = homog @ V.T @ P.T
-    w = clip[3]
-    if w <= 0:
-        return None
-    ndc = clip[:3] / w
-    px = (ndc[0] + 1) / 2 * image_size
-    py = (1 - ndc[1]) / 2 * image_size
-    return px, py
-
-
-def frame_to_data_uri(frame: np.ndarray, crop_center: tuple[float, float] | None = None,
-                       crop_radius: int = 30, out_size: int = 120) -> str:
-    """Render a thumbnail. If crop_center is given, zoom into a window around it -
-    the sphere is only ~2px across in the full 256x256 frame at this pilot's
-    observability-recalibrated (very wide) camera, so a straight resize makes it
-    invisible; this crop is purely a display aid and touches no analysis data."""
-    img = Image.fromarray(frame)
-    if crop_center is not None:
-        cx, cy = crop_center
-        w, h = img.size
-        left = max(0, min(w - 2 * crop_radius, cx - crop_radius))
-        top = max(0, min(h - 2 * crop_radius, cy - crop_radius))
-        img = img.crop((int(left), int(top), int(left) + 2 * crop_radius, int(top) + 2 * crop_radius))
-        img = img.resize((out_size, out_size), Image.NEAREST)
-    else:
-        img = img.resize((out_size, out_size), Image.LANCZOS)
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
-
-
-def build_frame_strip(pilot_dir: str, manifest: dict, clip_ids: list[str], n_thumbs: int = 5) -> dict:
-    """Zoomed-in thumbnails centered on the sphere's real projected position per frame."""
-    strips = {}
-    by_id = {r["clip_id"]: r for r in manifest["rows"]}
-    for clip_id in clip_ids:
-        row = by_id.get(clip_id)
-        if not row or not row.get("frames_path") or not row.get("state_path"):
-            continue
-        frames = np.load(os.path.join(pilot_dir, row["frames_path"]))
-        state = np.load(os.path.join(pilot_dir, row["state_path"]))
-        position, frame_steps = state["position"], state["frame_steps"]
-        idx = np.round(np.linspace(0, frames.shape[0] - 1, n_thumbs)).astype(int)
-        thumbs = []
-        for i in idx:
-            world_pos = position[frame_steps[i]]
-            center = world_to_pixel(world_pos, frames.shape[1])
-            thumbs.append(frame_to_data_uri(frames[i], crop_center=center))
-        strips[clip_id] = thumbs
-    return strips
+def video_to_data_uri(path: str) -> str:
+    """Embed an mp4 sample clip directly in the page as a data URI."""
+    with open(path, "rb") as f:
+        raw = f.read()
+    return "data:video/mp4;base64," + base64.b64encode(raw).decode("ascii")
 
 
 def spectrum_svg(analysis: dict, width=560, height=280) -> str:
@@ -233,26 +178,42 @@ def retention_bars_svg(analysis: dict, width=560, height=260) -> str:
 def main():
     base = os.path.dirname(os.path.abspath(__file__))
     exp_dir = os.path.dirname(base)
-    pilot_dir = os.path.join(exp_dir, "data", "pilot")
-    results_dir = os.path.join(exp_dir, "results")
+    pilot_dir = os.path.join(exp_dir, "data", "final_pilot")
+    results_dir = os.path.join(exp_dir, "results", "final_pilot")
+    samples_dir = os.path.join(exp_dir, "samples")
 
     with open(os.path.join(pilot_dir, "manifest.json")) as f:
         manifest = json.load(f)
     with open(os.path.join(results_dir, "pilot_analysis.json")) as f:
         analysis = json.load(f)
 
-    sample_clips = ["world000_baseline", "world000_gravity_high", "world000_restitution_high", "world000_friction_low"]
-    strips = build_frame_strip(pilot_dir, manifest, sample_clips)
-
     spectrum_html = spectrum_svg(analysis)
     heatmap_html = heatmap_svg(analysis["specificity_matrix"])
     bars_html = retention_bars_svg(analysis)
 
-    frame_strip_html = ""
-    for clip_id, thumbs in strips.items():
-        imgs = "".join(f'<img src="{t}" width="72" height="72" alt="frame">' for t in thumbs)
-        label = clip_id.replace("world000_", "")
-        frame_strip_html += f'<div class="strip"><div class="strip-label">{label}</div><div class="strip-frames">{imgs}</div></div>'
+    # Real rendered mp4 clips from the validated v4 pipeline (Blender EEVEE,
+    # -15deg camera, rf=0 physics) - embedded directly as <video>, not a PNG
+    # frame strip, since the frames/*.npy this pilot rendered were deleted
+    # immediately after encoding (the render->encode->delete disk-safe design;
+    # see remote/encode_and_sweep.py) and no longer exist to re-derive thumbnails
+    # from. These clips use a camera that tracks (crops around) the sphere for
+    # visual legibility here; the analysis pipeline itself encodes frames from
+    # the fixed, non-tracking v4 camera in sim/render.py, which is the one
+    # that actually feeds V-JEPA.
+    sample_videos = [
+        ("world000_baseline", "baseline (g=9.8, e=0.6, mu=0.2)"),
+        ("world000_restitution_high", "restitution_high (e=0.8)"),
+    ]
+    video_strip_html = ""
+    for clip_id, label in sample_videos:
+        mp4_path = os.path.join(samples_dir, f"{clip_id}_tracked.mp4")
+        if not os.path.exists(mp4_path):
+            continue
+        uri = video_to_data_uri(mp4_path)
+        video_strip_html += (
+            f'<div class="video-card"><div class="strip-label">{label}</div>'
+            f'<video src="{uri}" width="256" height="256" controls loop muted playsinline></video></div>'
+        )
 
     per_factor_rows = ""
     for factor in FACTOR_ORDER:
@@ -354,6 +315,8 @@ th {{ color: var(--muted); font-weight: 600; text-transform: uppercase; font-siz
 .strip-label {{ font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }}
 .strip-frames {{ display: flex; gap: 4px; overflow-x: auto; }}
 .strip-frames img {{ border-radius: 4px; border: 1px solid var(--border); flex-shrink: 0; }}
+.video-row {{ display: flex; gap: 16px; flex-wrap: wrap; }}
+.video-card video {{ border-radius: 8px; border: 1px solid var(--border); display: block; background: #000; }}
 footer {{ color: var(--muted); font-size: 12.5px; margin-top: 32px; line-height: 1.6; }}
 footer a {{ color: var(--text-secondary); }}
 code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-size: 12px; }}
@@ -363,12 +326,16 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
   <p class="subtitle">V-JEPA 2 embedding response to one-factor physics interventions on a simulated falling/bouncing sphere</p>
 
   <div class="pilot-banner">
-    <strong>Engineering pilot, not the confirmatory study.</strong>
+    <strong>Engineering pilot, not yet the confirmatory study &mdash; but a fully validated pipeline.</strong>
     {analysis['pilot_scale_caveat']}
-    Renderer: PyBullet TinyRenderer (Blender EEVEE unavailable in this sandbox) &mdash;
-    sanctioned in the design doc for smoke tests only, not the final 1,200-world split.
-    Model: <code>{analysis['model_id']}</code>, a documented substitution for the docx's
-    unpublished ViT-B/16 384px checkpoint.
+    This run replaces an earlier CPU/TinyRenderer pilot whose underlying video data had real, confirmed defects
+    (an unresolvably small sphere, motion that froze after ~2s, a lighting artifact that looked like a second
+    ball, and a camera angle that made real bounces visually unreadable). Every one of those was root-caused
+    against real position/velocity data and fixed before this run: GPU-rendered with Blender EEVEE (the design
+    doc's sanctioned renderer, not the TinyRenderer smoke-test path), a shallow &minus;15&deg; camera that
+    shows the true bounce arc, corrected lighting, and a bounded speed range that keeps the sphere continuously
+    moving and resolvable (~24px) for the full 6s clip. Model: <code>{analysis['model_id']}</code>, a documented
+    substitution for the docx's unpublished ViT-B/16 384px checkpoint.
   </div>
 
   <div class="card">
@@ -383,14 +350,15 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
     <p class="desc" style="margin-top:14px">
       <strong>Base world</strong>: one random starting position/velocity for the sphere, simulated once per
       physics setting (baseline plus each intervention), so every version of a world starts identically and
-      only the one changed constant differs. <strong>Accepted clips</strong>: 43 of 45 rendered clips (5
-      worlds &times; 9 versions) passed the visibility check described below; 2 were rejected.
-      <strong>Feature dim = 32,768</strong>: explained in the next card. <strong>Rank used = 3</strong>: the
-      largest basis size that leave-one-world-out testing (below) can still validate with only 5 worlds &mdash;
-      each test needs at least rank+1 worlds to train the basis on, so rank 3 leaves 2 worlds spare. The
-      docx's confirmatory design uses a fixed rank of 8, which needs far more worlds than this pilot has.
-      <strong>Weights hash</strong>: a fingerprint of the exact V-JEPA weights used, so results can be tied to
-      a specific checkpoint version.
+      only the one changed constant differs. <strong>Accepted clips</strong>: all 225 rendered clips (25
+      worlds &times; 9 versions) passed the visibility check described below &mdash; 0 rejected, unlike the
+      earlier pilot's 2/45. <strong>Feature dim = 32,768</strong>: explained in the next card.
+      <strong>Rank used = 8</strong>: this now matches the docx's confirmatory-design rank exactly (the earlier
+      5-world pilot could only support rank 3). <strong>Weights hash</strong>: a fingerprint of the exact
+      V-JEPA weights used; the concurrent encode daemon that produced this run's features didn't record it
+      (a logging gap fixed for future runs), so it reads as a placeholder rather than a real hash here &mdash;
+      it does not affect any number below, all of which came from the one <code>{analysis['model_id']}</code>
+      checkpoint loaded for this run.
     </p>
   </div>
 
@@ -419,8 +387,12 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
       <p>This matches the design doc's rule: keep the model's own time resolution instead of averaging
       the whole clip into one blurred snapshot.</p>
     </div>
-    <p class="desc">5 uniformly spaced frames from world000, zoomed to the sphere's real projected position (crop only &mdash; not seen by the encoder this way). The observability-recalibrated camera keeps the sphere in frame across its full ~8m rolling trajectory, but at that framing it is only ~2px across in the raw 256&times;256 render &mdash; too small to see unzoomed. Worth revisiting before the confirmatory study: either bound the rolling distance (nonzero rolling friction) or shorten the scored window, rather than widening the frame further.</p>
-    {frame_strip_html}
+    <p class="desc">Two real rendered clips from world000 (actual video, not a static frame strip) &mdash; the same
+    Blender-EEVEE, v4-camera pipeline that produced every clip this page's numbers are computed from. These
+    two use a camera that tracks (crops around) the sphere purely so it reads clearly at dashboard size; the
+    fixed, non-tracking camera in <code>sim/render.py</code> is what actually encodes into V-JEPA and is what
+    the camera-projection math in the companion methods report describes.</p>
+    <div class="video-row">{video_strip_html}</div>
   </div>
 
   <div class="grid-2">
@@ -436,11 +408,12 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
         <p><strong>r90</strong> = the smallest r where that fraction reaches 90%. A truly compact code would
         keep r90 small and flat no matter how many worlds you add.</p>
         <div class="kicker">What the result actually shows here</div>
-        <p>r90 lands at 6&ndash;8, barely below the 9&ndash;10 &Delta;z pairs each factor has. With this few
-        rows in a 32,768-dimensional space, SVD can <em>always</em> explain 90% of the energy in close to
-        n&minus;1 directions &mdash; that's a property of having few samples in a huge space, not evidence
-        of a real low-rank code. The confirmatory study (hundreds of pairs per factor) is what would let
-        r90 actually fall below the sample count if a compact code exists.</p>
+        <p>r90 ranges 4 (friction) to 28 (velocity) out of 50 &Delta;z pairs per factor &mdash; friction's
+        spectrum is genuinely compact (90% of its energy in just 4 directions), while velocity and gravity
+        need most of their available rank. With 50 pairs per factor (versus 9&ndash;10 in the earlier 5-world
+        pilot), r90 is no longer automatically pinned near the sample count, so this is a first real read on
+        compactness rather than a sample-size artifact &mdash; though the docx's confirmatory design (hundreds
+        of pairs) is still what would make these numbers precise.</p>
       </div>
       {spectrum_html}
     </div>
@@ -448,7 +421,7 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
       <h2>Specificity matrix</h2>
       <div class="method-box">
         <div class="kicker">What it measures</div>
-        <p>Fit a rank-3 basis using only one factor's &Delta;z vectors (the row). Project a <em>different</em>
+        <p>Fit a rank-8 basis using only one factor's &Delta;z vectors (the row). Project a <em>different</em>
         factor's &Delta;z vectors (the column) onto that basis and measure what fraction of their energy it
         recovers:</p>
         <span class="formula">retention = 1 &minus; &Vert;residual&Vert;&sup2; / &Vert;original&Vert;&sup2;</span>
@@ -456,16 +429,22 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
         evidence gravity has its own distinct direction rather than all factors just producing generic
         "the ball moved differently" motion.</p>
         <div class="kicker">A fix worth knowing about</div>
-        <p>The first version of this matrix fit and tested the diagonal on the <em>same</em> data, which
+        <p>An earlier version of this matrix fit and tested the diagonal on the <em>same</em> data, which
         trivially made every diagonal cell look better than the off-diagonal cells regardless of any real
-        signal. The diagonal here now uses the same held-out (leave-one-world-out) retention as the chart
-        below, so every cell &mdash; diagonal included &mdash; is tested on data its basis never saw.</p>
+        signal. The diagonal here uses the same held-out (leave-one-world-out) retention as the chart below,
+        so every cell &mdash; diagonal included &mdash; is tested on data its basis never saw.</p>
         <div class="kicker">What the result actually shows here</div>
-        <p>Once that's fixed, there is no clear specificity signal at this sample size: e.g. friction's
-        basis explains more of gravity's held-out variation (0.30) than gravity's own basis does (0.08).
-        With only 5 worlds, every cell is noisy. This is an honest null result at pilot scale, not a
-        finding either way &mdash; the confirmatory study needs enough worlds for the diagonal to
-        consistently separate from the off-diagonal before specificity can be claimed.</p>
+        <p><strong>Gravity, restitution, and velocity are each specific</strong>: each factor's own diagonal
+        cell is the largest value in its row (gravity 0.638, restitution 0.678, velocity 0.391), meaning each
+        factor's basis reconstructs its own held-out effect far better than any other factor's basis does.
+        Gravity and restitution show real cross-talk with each other (gravity's basis retains 0.299 of
+        restitution's effect, and vice versa 0.293) &mdash; physically sensible, since both act on the sphere's
+        vertical dynamics. <strong>Friction shows no specificity</strong>: its own diagonal (0.037) is the
+        <em>smallest</em> value in its row &mdash; velocity's basis (0.062) explains friction's held-out
+        variation better than friction's own basis does. Combined with friction's very low mean-shift energy
+        fraction (2%) and tiny effect norm below, this suggests V-JEPA's embedding barely registers this
+        friction range as a distinct signal at all, rather than registering it as a signal that gets confused
+        with other factors.</p>
       </div>
       {heatmap_html}
     </div>
@@ -480,18 +459,19 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
       <div class="kicker">How it's computed</div>
       <ol class="step-list">
         <li>Hold out one world's &Delta;z vectors for this factor.</li>
-        <li>Fit a rank-3 uncentered SVD basis on the remaining worlds' &Delta;z vectors only.</li>
+        <li>Fit a rank-8 uncentered SVD basis on the remaining worlds' &Delta;z vectors only.</li>
         <li>Project the held-out world's &Delta;z onto that basis and measure retained energy (same formula
         as the specificity matrix).</li>
-        <li>Repeat once per world (5 folds here), average the 5 retention values.</li>
+        <li>Repeat once per world (25 folds here), average the 25 retention values.</li>
       </ol>
       <div class="kicker">A number to calibrate against</div>
-      <p>A random rank-3 direction in a 32,768-dimensional space would be expected to explain about
-      rank / dimension = 3 / 32,768 &asymp; 0.0001 of a held-out vector's energy purely by chance (the math
-      memo's H&#8320;-geometry null). Every bar below (0.04&ndash;0.21) sits far above that chance floor, which
-      is a real sign V-JEPA's embedding responds to these interventions in a structured way &mdash; but the
-      bars are still low in absolute terms and noisy across only 5 folds (see the individual dots), so they
-      are not yet precise enough to say whether one factor generalizes better than another.</p>
+      <p>A random rank-8 direction in a 32,768-dimensional space would be expected to explain about
+      rank / dimension = 8 / 32,768 &asymp; 0.00024 of a held-out vector's energy purely by chance (the math
+      memo's H&#8320;-geometry null). Every bar below (0.037&ndash;0.678) sits far above that chance floor.
+      Gravity, restitution, and velocity all clear 0.39&ndash;0.68 &mdash; a strong, structured signal, not
+      noise. Friction sits at 0.037: still ~150&times; the chance floor, so the model is not completely blind
+      to friction, but two orders of magnitude weaker than the other three factors and (per the specificity
+      matrix) not even the best-explaining basis for its own effect.</p>
     </div>
     <p class="desc">Fit rank-{analysis['rank_used']} basis on all-but-one world, measure retained energy on the held-out world's &Delta;z. Dots are individual folds (n={analysis['n_worlds']}).</p>
     {bars_html}
@@ -504,8 +484,9 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
       <p>What share of a factor's average &Delta;z-squared-length is explained just by one single "always
       shift this way" vector (the mean of all its &Delta;z), versus needing a different direction per world:</p>
       <span class="formula">fraction = &Vert;mean(&Delta;z)&Vert;&sup2; / mean(&Vert;&Delta;z&Vert;&sup2;)</span>
-      <p>Low values (0.13&ndash;0.18 here) mean the effect's direction depends noticeably on the specific
-      world, not just a single constant shift added to every embedding.</p>
+      <p>Low across the board (2&ndash;21%) &mdash; every factor's effect direction depends noticeably on the
+      specific world rather than being one constant shift added to every embedding. Restitution is highest
+      (21%): changing bounciness produces the most world-independent, consistent embedding shift of the four.</p>
     </div>
     <table>
       <thead><tr><th>Factor</th><th>Pairs</th><th>r90</th><th>Mean-shift energy frac.</th><th>LOWO retention</th></tr></thead>
@@ -514,12 +495,15 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
   </div>
 
   <footer>
-    Generated from a {analysis['n_worlds']}-world pilot run on a CPU-only sandbox (no GPU, no Blender).
-    Every number on this page demonstrates the analysis pipeline end-to-end; none of it is statistically
-    powered evidence for or against the low-rank/factor-specificity hypothesis in
-    <code>01_3D_VJEPA_Research_Agenda.docx</code> &mdash; that requires the full 1,200-world confirmatory
-    study with Blender rendering and GPU-scale V-JEPA inference. Source: <code>experiment/analysis/svd_analysis.py</code>
-    and <code>experiment/dashboard/build_dashboard.py</code> in this repository.
+    Generated from a {analysis['n_worlds']}-world, {analysis['n_accepted_clips']}-clip pilot run on a GPU pod
+    with Blender EEVEE rendering &mdash; the same renderer, camera, and physics settings the confirmatory study
+    will use, just at 25 worlds instead of 1,200. Every number on this page comes from that run; the
+    gravity/restitution/velocity specificity result is a real, structured signal well above chance, and the
+    friction null result is likewise real, not a rendering or physics artifact &mdash; see the companion
+    methods report for how each number was computed. What this pilot does <em>not</em> yet establish is
+    statistical power at the scale of <code>01_3D_VJEPA_Research_Agenda.docx</code>'s full 1,200-world design;
+    that confirmatory run is the next step. Source: <code>experiment/analysis/svd_analysis.py</code> and
+    <code>experiment/dashboard/build_dashboard.py</code> in this repository.
   </footer>
 </div>
 """
