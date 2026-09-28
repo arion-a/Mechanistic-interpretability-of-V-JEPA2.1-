@@ -11,9 +11,13 @@ import base64
 import io
 import json
 import os
+import sys
 
 import numpy as np
 from PIL import Image
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "sim"))
+import render as render_mod  # noqa: E402 - reuses the exact camera matrices used for analysis
 
 # Reference categorical palette (dataviz skill), fixed hue order, factor-slot mapping
 FACTOR_COLORS = {

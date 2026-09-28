@@ -10,3 +10,9 @@ __pycache__/
 
 # Run logs
 *_log.txt
+
+# Pod credentials (URL + Jupyter token) - never commit
+remote/pod_config.py
+
+# Local review screenshots (not a deliverable)
+dashboard/preview.png
