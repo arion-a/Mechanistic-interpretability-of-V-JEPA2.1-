@@ -6,6 +6,7 @@ deletes the raw frames file immediately - so disk usage stays flat
 instead of needing to hold the full rendered dataset on disk at once.
 """
 import argparse
+import hashlib
 import json
 import os
 import time
@@ -18,6 +19,13 @@ MODEL_ID = "facebook/vjepa2-vitl-fpc64-256"
 NUM_SPATIAL_PATCHES = (256 // 16) ** 2
 NUM_TEMPORAL_TUBELETS = 64 // 2
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+
+def weights_hash(model) -> str:
+    h = hashlib.sha256()
+    for _, t in sorted(model.state_dict().items()):
+        h.update(t.detach().cpu().numpy().tobytes())
+    return h.hexdigest()[:16]
 
 
 def main():
@@ -38,7 +46,8 @@ def main():
 
     processor = AutoVideoProcessor.from_pretrained(MODEL_ID, cache_dir=args.cache_dir)
     model = AutoModel.from_pretrained(MODEL_ID, cache_dir=args.cache_dir).to(DEVICE).eval()
-    print(f"SWEEPER device={DEVICE} expecting {total_expected} clips", flush=True)
+    whash = weights_hash(model)
+    print(f"SWEEPER device={DEVICE} weights_hash={whash} expecting {total_expected} clips", flush=True)
 
     done = set()
     rows = []
@@ -88,7 +97,7 @@ def main():
             print(f"SWEEPER ENCODED {clip_id} ({len(done)}/{total_expected}) {dt:.2f}s", flush=True)
 
     meta = {
-        "model_id": MODEL_ID, "device": DEVICE,
+        "model_id": MODEL_ID, "device": DEVICE, "weights_hash": whash,
         "frames_per_clip": 64, "num_temporal_tubelets": NUM_TEMPORAL_TUBELETS,
         "num_spatial_patches": NUM_SPATIAL_PATCHES,
         "layer": "final_hidden_state", "pooling": "spatial_mean_per_tubelet_temporal_concat",

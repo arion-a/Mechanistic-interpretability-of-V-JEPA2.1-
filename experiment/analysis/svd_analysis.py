@@ -171,7 +171,7 @@ def main():
         "n_accepted_clips": int(len(df)),
         "feature_dim": int(feat_meta["rows"][0]["feature_dim"]) if feat_meta["rows"] else None,
         "model_id": feat_meta["model_id"],
-        "weights_hash": feat_meta["weights_hash"],
+        "weights_hash": feat_meta.get("weights_hash", "not_recorded_by_sweeper"),
         "rank_used": rank,
         "per_factor": {},
     }
