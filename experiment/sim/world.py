@@ -35,9 +35,16 @@ PHYSICAL_FACTORS = {
     "restitution": {"low": 0.3, "high": 0.8},
     "friction": {"low": 0.1, "high": 0.4},
 }
-VELOCITY_DELTA = 0.15  # m/s, added along initial horizontal heading (deviation, see sample_anchor)
-ROLLING_FRICTION = 0.02  # deviation from docx's rf=0: bounds worst-case excursion, applied
-# identically across all conditions so it never confounds the sliding-friction (BASELINE_MU) intervention
+VELOCITY_DELTA = 0.1  # m/s, added along initial horizontal heading (deviation, see sample_anchor)
+# ROLLING_FRICTION was tried at 0.02 to bound excursion, but real trajectory data
+# showed it brings the sphere to a complete, exact stop by ~t=1.5-2s (zero
+# displacement for the remaining 4s of the 6s scored window) - it bounds
+# distance by killing motion, not by making the motion itself small. Reverted
+# to the docx's original rf=0: with the shrunk speed range below, worst-case
+# continuous rolling (never stops, matching the docx's physical assumption)
+# still only covers ~2m over the full 6s, so the fix is a smaller speed range,
+# not an added friction term.
+ROLLING_FRICTION = 0.0
 
 
 def derive_seed(root_seed: int, role: str, index: int) -> int:
@@ -77,10 +84,11 @@ def sample_anchor(root_seed: int, base_world_index: int) -> AnchorState:
         # cannot both keep the full trajectory excursion in frame AND resolve
         # the sphere at a useful pixel size - measured real excursion at the
         # docx's original ranges reached 8-11m (with the velocity intervention),
-        # leaving the sphere ~5px across (<1/3 of one ViT patch). Shrinking the
-        # speed range bounds worst-case excursion to ~2.75m, sphere ~19px.
-        # See experiment/remote/ for the PyBullet measurements behind this.
-        horizontal_speed=float(rng.uniform(0.3, 0.6)),
+        # leaving the sphere ~5px across (<1/3 of one ViT patch). This range,
+        # combined with rf=0 (real docx value, see ROLLING_FRICTION), bounds
+        # worst-case continuous-rolling excursion to ~2m while the sphere
+        # keeps moving for the entire 6s window (never grinds to a stop).
+        horizontal_speed=float(rng.uniform(0.15, 0.35)),
         vz0=float(rng.uniform(-0.5, 0.5)),
     )
 

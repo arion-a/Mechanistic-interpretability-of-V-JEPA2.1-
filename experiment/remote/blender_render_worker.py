@@ -88,12 +88,18 @@ def setup_scene(image_size: int, samples: int):
 
     sun_data = bpy.data.lights.new("Sun", type="SUN")
     sun_data.energy = 3.0
+    # A grazing 55deg elevation cast a long, hard-edged shadow that read as a
+    # second dark ball floating near the sphere (confirmed: disappears when
+    # the sun is hidden from render). Lower elevation (steeper, more overhead
+    # light) plus a wider sun angle (soft shadow) keeps the shadow small and
+    # directly under the sphere instead.
     sun_obj = bpy.data.objects.new("Sun", sun_data)
-    sun_obj.rotation_euler = (math.radians(55), 0, math.radians(35))
+    sun_obj.rotation_euler = (math.radians(25), 0, math.radians(35))
+    sun_data.angle = math.radians(5.0)
     scene.collection.objects.link(sun_obj)
     scene.world = bpy.data.worlds.new("World")
     scene.world.use_nodes = True
-    scene.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.4
+    scene.world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.7
 
     try:
         scene.render.engine = "BLENDER_EEVEE_NEXT"
