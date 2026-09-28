@@ -108,8 +108,17 @@ def leave_one_world_out_retention(delta_matrix: np.ndarray, world_ids: np.ndarra
     }
 
 
-def specificity_matrix(deltas: dict[str, np.ndarray], rank: int) -> pd.DataFrame:
-    """Row = fitted factor basis, column = test factor's Delta-z energy retention at equal rank."""
+def specificity_matrix(deltas: dict[str, np.ndarray], world_ids: dict[str, np.ndarray],
+                        rank: int, diagonal_retention: dict[str, float]) -> pd.DataFrame:
+    """Row = fitted factor basis, column = test factor's Delta-z energy retention at equal rank.
+
+    Off-diagonal cells fit the basis on all of row_factor's Delta-z and test on
+    col_factor's Delta-z - already a fair held-out comparison since the basis
+    never saw col_factor's data. The diagonal (row_factor == col_factor) uses
+    the SAME leave-one-world-out retention as the retention chart instead of
+    fitting and testing on identical rows, which would trivially look better
+    than every off-diagonal cell regardless of any real factor-specific signal.
+    """
     factors = list(deltas.keys())
     bases = {}
     for f in factors:
@@ -121,6 +130,9 @@ def specificity_matrix(deltas: dict[str, np.ndarray], rank: int) -> pd.DataFrame
     for row_factor in factors:
         basis = bases[row_factor]
         for col_factor in factors:
+            if row_factor == col_factor:
+                mat.loc[row_factor, col_factor] = diagonal_retention[row_factor]
+                continue
             test = deltas[col_factor]
             proj = test @ basis.T @ basis
             residual = np.sum((test - proj) ** 2, axis=1)
@@ -178,7 +190,8 @@ def main():
             "loWO_rank_retention": retention,
         }
 
-    spec_mat = specificity_matrix(deltas, rank)
+    diagonal_retention = {f: report["per_factor"][f]["loWO_rank_retention"]["mean_retention"] for f in deltas}
+    spec_mat = specificity_matrix(deltas, world_ids, rank, diagonal_retention)
     report["specificity_matrix"] = spec_mat.to_dict()
 
     with open(os.path.join(out_dir, "pilot_analysis.json"), "w") as f:

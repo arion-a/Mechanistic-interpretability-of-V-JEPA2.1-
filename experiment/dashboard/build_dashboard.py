@@ -337,6 +337,19 @@ th {{ color: var(--muted); font-weight: 600; text-transform: uppercase; font-siz
 .legend {{ display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; font-size: 12.5px; color: var(--text-secondary); }}
 .legend-item {{ display: inline-flex; align-items: center; gap: 6px; }}
 .legend-item i {{ width: 10px; height: 10px; border-radius: 2px; display: inline-block; }}
+.method-box {{
+  background: var(--page); border: 1px solid var(--border); border-radius: 8px;
+  padding: 14px 16px; margin-bottom: 16px; font-size: 13px; line-height: 1.6;
+}}
+.method-box .kicker {{ font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  color: var(--text-secondary); margin-bottom: 3px; }}
+.method-box p {{ margin: 0 0 8px; }}
+.method-box p:last-child {{ margin-bottom: 0; }}
+.formula {{ display: block; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px;
+  background: var(--gridline); border-radius: 6px; padding: 8px 12px; margin: 6px 0; overflow-x: auto;
+  color: var(--text-primary); }}
+.step-list {{ margin: 6px 0 8px 0; padding-left: 20px; }}
+.step-list li {{ margin-bottom: 4px; }}
 .strip {{ margin-bottom: 14px; }}
 .strip-label {{ font-size: 12.5px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600; }}
 .strip-frames {{ display: flex; gap: 4px; overflow-x: auto; }}
@@ -363,14 +376,49 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
     <div class="meta-grid">
       <div class="meta-item"><div class="label">Base worlds</div><div class="value">{analysis['n_worlds']}</div></div>
       <div class="meta-item"><div class="label">Accepted clips</div><div class="value">{analysis['n_accepted_clips']}</div></div>
-      <div class="meta-item"><div class="label">Feature dim</div><div class="value">{analysis['feature_dim']}</div></div>
+      <div class="meta-item"><div class="label">Feature dim</div><div class="value">{analysis['feature_dim']:,}</div></div>
       <div class="meta-item"><div class="label">Rank used</div><div class="value">{analysis['rank_used']}</div></div>
       <div class="meta-item"><div class="label">Weights hash</div><div class="value">{analysis['weights_hash']}</div></div>
     </div>
+    <p class="desc" style="margin-top:14px">
+      <strong>Base world</strong>: one random starting position/velocity for the sphere, simulated once per
+      physics setting (baseline plus each intervention), so every version of a world starts identically and
+      only the one changed constant differs. <strong>Accepted clips</strong>: 43 of 45 rendered clips (5
+      worlds &times; 9 versions) passed the visibility check described below; 2 were rejected.
+      <strong>Feature dim = 32,768</strong>: explained in the next card. <strong>Rank used = 3</strong>: the
+      largest basis size that leave-one-world-out testing (below) can still validate with only 5 worlds &mdash;
+      each test needs at least rank+1 worlds to train the basis on, so rank 3 leaves 2 worlds spare. The
+      docx's confirmatory design uses a fixed rank of 8, which needs far more worlds than this pilot has.
+      <strong>Weights hash</strong>: a fingerprint of the exact V-JEPA weights used, so results can be tied to
+      a specific checkpoint version.
+    </p>
   </div>
 
   <div class="card">
-    <h2>Sample clips (real rendered frames)</h2>
+    <h2>How a video becomes one number: &Delta;z</h2>
+    <div class="method-box">
+      <div class="kicker">What &Delta;z is</div>
+      <p>Every chart below is built from one quantity: for a given base world and a given physical factor
+      (say, gravity), we render two clips that are identical in every way &mdash; same start position, same
+      start velocity, same random seed &mdash; except that one constant (gravity) is set to a different
+      value. We run both clips through the frozen V-JEPA encoder to get two vectors, then subtract:</p>
+      <span class="formula">&Delta;z = z(intervention clip) &minus; z(baseline clip)</span>
+      <p>&Delta;z is a list of 32,768 numbers describing exactly how the model's internal representation
+      moved, purely because of that one changed physical constant and nothing else.</p>
+      <div class="kicker" style="margin-top:10px">How each z (32,768 numbers) is built</div>
+      <ol class="step-list">
+        <li>Take 64 frames evenly spaced across the 6-second clip (the model's required input length).</li>
+        <li>Run them through the frozen encoder. Its output is 8,192 "tokens" &times; 1,024 numbers each.</li>
+        <li>Those 8,192 tokens are really 32 time-steps &times; 256 spatial patches (16&times;16 grid over the
+        256&times;256 frame), each a 1,024-number vector &mdash; confirmed from the model's own patch-embedding
+        code, which lays tokens out in that time-major order.</li>
+        <li>Average the 256 spatial patches together at each of the 32 time-steps, leaving 32 vectors of
+        1,024 numbers.</li>
+        <li>Lay those 32 vectors end to end: 32 &times; 1,024 = <strong>32,768</strong> numbers. That is z.</li>
+      </ol>
+      <p>This matches the design doc's rule: keep the model's own time resolution instead of averaging
+      the whole clip into one blurred snapshot.</p>
+    </div>
     <p class="desc">5 uniformly spaced frames from world000, zoomed to the sphere's real projected position (crop only &mdash; not seen by the encoder this way). The observability-recalibrated camera keeps the sphere in frame across its full ~8m rolling trajectory, but at that framing it is only ~2px across in the raw 256&times;256 render &mdash; too small to see unzoomed. Worth revisiting before the confirmatory study: either bound the rolling distance (nonzero rolling friction) or shorten the scored window, rather than widening the frame further.</p>
     {frame_strip_html}
   </div>
@@ -378,24 +426,87 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
   <div class="grid-2">
     <div class="card">
       <h2>Uncentered SVD spectrum</h2>
-      <p class="desc">Cumulative reconstruction energy vs. rank, fit separately per factor on baseline&rarr;intervention &Delta;z.</p>
+      <div class="method-box">
+        <div class="kicker">What it measures</div>
+        <p>For one factor (e.g. gravity), stack every &Delta;z we have for it into a table: one row per
+        world/intervention pair, 32,768 columns. Singular value decomposition (SVD) finds a set of
+        directions, ranked by how much of the rows' total squared length ("energy") each one accounts for.</p>
+        <div class="kicker">How the chart is computed</div>
+        <span class="formula">cumulative energy at rank r = (sum of top-r singular values&sup2;) / (sum of all singular values&sup2;)</span>
+        <p><strong>r90</strong> = the smallest r where that fraction reaches 90%. A truly compact code would
+        keep r90 small and flat no matter how many worlds you add.</p>
+        <div class="kicker">What the result actually shows here</div>
+        <p>r90 lands at 6&ndash;8, barely below the 9&ndash;10 &Delta;z pairs each factor has. With this few
+        rows in a 32,768-dimensional space, SVD can <em>always</em> explain 90% of the energy in close to
+        n&minus;1 directions &mdash; that's a property of having few samples in a huge space, not evidence
+        of a real low-rank code. The confirmatory study (hundreds of pairs per factor) is what would let
+        r90 actually fall below the sample count if a compact code exists.</p>
+      </div>
       {spectrum_html}
     </div>
     <div class="card">
       <h2>Specificity matrix</h2>
-      <p class="desc">Row = basis fit to that factor's &Delta;z; column = energy retained on another factor's &Delta;z at equal rank.</p>
+      <div class="method-box">
+        <div class="kicker">What it measures</div>
+        <p>Fit a rank-3 basis using only one factor's &Delta;z vectors (the row). Project a <em>different</em>
+        factor's &Delta;z vectors (the column) onto that basis and measure what fraction of their energy it
+        recovers:</p>
+        <span class="formula">retention = 1 &minus; &Vert;residual&Vert;&sup2; / &Vert;original&Vert;&sup2;</span>
+        <p>If gravity's own basis explains gravity's changes much better than friction's basis does, that's
+        evidence gravity has its own distinct direction rather than all factors just producing generic
+        "the ball moved differently" motion.</p>
+        <div class="kicker">A fix worth knowing about</div>
+        <p>The first version of this matrix fit and tested the diagonal on the <em>same</em> data, which
+        trivially made every diagonal cell look better than the off-diagonal cells regardless of any real
+        signal. The diagonal here now uses the same held-out (leave-one-world-out) retention as the chart
+        below, so every cell &mdash; diagonal included &mdash; is tested on data its basis never saw.</p>
+        <div class="kicker">What the result actually shows here</div>
+        <p>Once that's fixed, there is no clear specificity signal at this sample size: e.g. friction's
+        basis explains more of gravity's held-out variation (0.30) than gravity's own basis does (0.08).
+        With only 5 worlds, every cell is noisy. This is an honest null result at pilot scale, not a
+        finding either way &mdash; the confirmatory study needs enough worlds for the diagonal to
+        consistently separate from the off-diagonal before specificity can be claimed.</p>
+      </div>
       {heatmap_html}
     </div>
   </div>
 
   <div class="card">
     <h2>Leave-one-world-out rank retention</h2>
+    <div class="method-box">
+      <div class="kicker">What it measures</div>
+      <p>Whether a direction learned from some worlds actually predicts the direction of change in a
+      <em>new</em> world it never saw &mdash; the generalization test every number above depends on.</p>
+      <div class="kicker">How it's computed</div>
+      <ol class="step-list">
+        <li>Hold out one world's &Delta;z vectors for this factor.</li>
+        <li>Fit a rank-3 uncentered SVD basis on the remaining worlds' &Delta;z vectors only.</li>
+        <li>Project the held-out world's &Delta;z onto that basis and measure retained energy (same formula
+        as the specificity matrix).</li>
+        <li>Repeat once per world (5 folds here), average the 5 retention values.</li>
+      </ol>
+      <div class="kicker">A number to calibrate against</div>
+      <p>A random rank-3 direction in a 32,768-dimensional space would be expected to explain about
+      rank / dimension = 3 / 32,768 &asymp; 0.0001 of a held-out vector's energy purely by chance (the math
+      memo's H&#8320;-geometry null). Every bar below (0.04&ndash;0.21) sits far above that chance floor, which
+      is a real sign V-JEPA's embedding responds to these interventions in a structured way &mdash; but the
+      bars are still low in absolute terms and noisy across only 5 folds (see the individual dots), so they
+      are not yet precise enough to say whether one factor generalizes better than another.</p>
+    </div>
     <p class="desc">Fit rank-{analysis['rank_used']} basis on all-but-one world, measure retained energy on the held-out world's &Delta;z. Dots are individual folds (n={analysis['n_worlds']}).</p>
     {bars_html}
   </div>
 
   <div class="card">
     <h2>Per-factor summary</h2>
+    <div class="method-box">
+      <div class="kicker">Mean-shift energy fraction, explained</div>
+      <p>What share of a factor's average &Delta;z-squared-length is explained just by one single "always
+      shift this way" vector (the mean of all its &Delta;z), versus needing a different direction per world:</p>
+      <span class="formula">fraction = &Vert;mean(&Delta;z)&Vert;&sup2; / mean(&Vert;&Delta;z&Vert;&sup2;)</span>
+      <p>Low values (0.13&ndash;0.18 here) mean the effect's direction depends noticeably on the specific
+      world, not just a single constant shift added to every embedding.</p>
+    </div>
     <table>
       <thead><tr><th>Factor</th><th>Pairs</th><th>r90</th><th>Mean-shift energy frac.</th><th>LOWO retention</th></tr></thead>
       <tbody>{per_factor_rows}</tbody>
@@ -404,11 +515,11 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
 
   <footer>
     Generated from a {analysis['n_worlds']}-world pilot run on a CPU-only sandbox (no GPU, no Blender).
-    Diagonal cells in the specificity matrix are outlined. Numbers here demonstrate the analysis
-    pipeline end-to-end; they are not statistically powered evidence for or against the
-    low-rank/factor-specificity hypothesis in <code>01_3D_VJEPA_Research_Agenda.docx</code> &mdash;
-    that requires the full 1,200-world confirmatory study with Blender rendering and GPU-scale
-    V-JEPA inference.
+    Every number on this page demonstrates the analysis pipeline end-to-end; none of it is statistically
+    powered evidence for or against the low-rank/factor-specificity hypothesis in
+    <code>01_3D_VJEPA_Research_Agenda.docx</code> &mdash; that requires the full 1,200-world confirmatory
+    study with Blender rendering and GPU-scale V-JEPA inference. Source: <code>experiment/analysis/svd_analysis.py</code>
+    and <code>experiment/dashboard/build_dashboard.py</code> in this repository.
   </footer>
 </div>
 """
