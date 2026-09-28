@@ -29,24 +29,60 @@ FACTOR_COLORS = {
 FACTOR_ORDER = ["gravity", "restitution", "friction", "velocity"]
 
 
-def frame_to_data_uri(frame: np.ndarray) -> str:
+def world_to_pixel(pos: np.ndarray, image_size: int) -> tuple[float, float] | None:
+    """Project a world-space point to pixel coords using the exact analysis camera."""
+    V = np.array(render_mod._VIEW_MATRIX).reshape(4, 4, order="F")
+    P = np.array(render_mod._PROJ_MATRIX).reshape(4, 4, order="F")
+    homog = np.append(pos, 1.0)
+    clip = homog @ V.T @ P.T
+    w = clip[3]
+    if w <= 0:
+        return None
+    ndc = clip[:3] / w
+    px = (ndc[0] + 1) / 2 * image_size
+    py = (1 - ndc[1]) / 2 * image_size
+    return px, py
+
+
+def frame_to_data_uri(frame: np.ndarray, crop_center: tuple[float, float] | None = None,
+                       crop_radius: int = 30, out_size: int = 120) -> str:
+    """Render a thumbnail. If crop_center is given, zoom into a window around it -
+    the sphere is only ~2px across in the full 256x256 frame at this pilot's
+    observability-recalibrated (very wide) camera, so a straight resize makes it
+    invisible; this crop is purely a display aid and touches no analysis data."""
     img = Image.fromarray(frame)
-    img = img.resize((96, 96), Image.LANCZOS)
+    if crop_center is not None:
+        cx, cy = crop_center
+        w, h = img.size
+        left = max(0, min(w - 2 * crop_radius, cx - crop_radius))
+        top = max(0, min(h - 2 * crop_radius, cy - crop_radius))
+        img = img.crop((int(left), int(top), int(left) + 2 * crop_radius, int(top) + 2 * crop_radius))
+        img = img.resize((out_size, out_size), Image.NEAREST)
+    else:
+        img = img.resize((out_size, out_size), Image.LANCZOS)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("ascii")
 
 
 def build_frame_strip(pilot_dir: str, manifest: dict, clip_ids: list[str], n_thumbs: int = 5) -> dict:
+    """Zoomed-in thumbnails centered on the sphere's real projected position per frame."""
     strips = {}
     by_id = {r["clip_id"]: r for r in manifest["rows"]}
     for clip_id in clip_ids:
         row = by_id.get(clip_id)
-        if not row or not row.get("frames_path"):
+        if not row or not row.get("frames_path") or not row.get("state_path"):
             continue
         frames = np.load(os.path.join(pilot_dir, row["frames_path"]))
+        state = np.load(os.path.join(pilot_dir, row["state_path"]))
+        position, frame_steps = state["position"], state["frame_steps"]
         idx = np.round(np.linspace(0, frames.shape[0] - 1, n_thumbs)).astype(int)
-        strips[clip_id] = [frame_to_data_uri(frames[i]) for i in idx]
+        thumbs = []
+        for i in idx:
+            world_pos = position[frame_steps[i]]
+            center = world_to_pixel(world_pos, frames.shape[1])
+            thumbs.append(frame_to_data_uri(frames[i], crop_center=center))
+        strips[clip_id] = thumbs
     return strips
 
 
@@ -314,7 +350,7 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
   <p class="subtitle">V-JEPA 2 embedding response to one-factor physics interventions on a simulated falling/bouncing sphere</p>
 
   <div class="pilot-banner">
-    <strong>⚠ Engineering pilot, not the confirmatory study.</strong>
+    <strong>Engineering pilot, not the confirmatory study.</strong>
     {analysis['pilot_scale_caveat']}
     Renderer: PyBullet TinyRenderer (Blender EEVEE unavailable in this sandbox) &mdash;
     sanctioned in the design doc for smoke tests only, not the final 1,200-world split.
@@ -335,7 +371,7 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
 
   <div class="card">
     <h2>Sample clips (real rendered frames)</h2>
-    <p class="desc">5 uniformly spaced frames from world000 across baseline and three interventions &mdash; ground truth for what the encoder actually saw.</p>
+    <p class="desc">5 uniformly spaced frames from world000, zoomed to the sphere's real projected position (crop only &mdash; not seen by the encoder this way). The observability-recalibrated camera keeps the sphere in frame across its full ~8m rolling trajectory, but at that framing it is only ~2px across in the raw 256&times;256 render &mdash; too small to see unzoomed. Worth revisiting before the confirmatory study: either bound the rolling distance (nonzero rolling friction) or shorten the scored window, rather than widening the frame further.</p>
     {frame_strip_html}
   </div>
 
