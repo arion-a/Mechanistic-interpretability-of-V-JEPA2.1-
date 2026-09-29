@@ -1,6 +1,6 @@
 """Build the companion methods/math report: every transformation from raw
-simulator state to each figure in pilot_dashboard.html, with real worked
-numbers from this pilot's own data (not illustrative/fake numbers).
+simulator state to each figure in the confirmatory-study dashboard, with real
+worked numbers from this run's own data (not illustrative/fake numbers).
 
 Uses a plain string template (not an f-string) because the page is full of
 literal LaTeX braces (\\frac{a}{b}) that would collide with f-string
@@ -121,9 +121,9 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 40px; line-height: 
 footer a { color: var(--text-secondary); }
 </style>
 <div class="wrap">
-  <h1>Intervention Geometry Methods</h1>
-  <p class="subtitle">Every transformation from simulator state to each number and figure in the pilot dashboard, worked through with this run's own real values.</p>
-  <p class="crossref">Companion to the results dashboard &middot; source: <code>experiment/analysis/svd_analysis.py</code> and <code>experiment/encode/encode_pilot.py</code> in the repository.</p>
+  <h1>Intervention Geometry Methods &mdash; Confirmatory Study</h1>
+  <p class="subtitle">Every transformation from simulator state to each number and figure in the confirmatory-study dashboard, worked through with this run's own real values (N=%%N_WORLDS%% worlds, %%N_ACCEPTED_CLIPS%% clips).</p>
+  <p class="crossref">Companion to the results dashboard &middot; source: <code>experiment/analysis/svd_analysis.py</code> and <code>experiment/remote/encode_and_sweep.py</code> in the repository.</p>
 
   <div class="pipeline">
     <div class="step">1&nbsp;&middot;&nbsp;simulate state</div><div class="arrow">&rarr;</div>
@@ -212,10 +212,10 @@ footer a { color: var(--text-secondary); }
 
   <h2><span class="stage-num">06</span>Stacking &Delta;z per factor</h2>
   <div class="card">
-    <p>For one factor (e.g. gravity: two levels &times; 5 worlds), stack every &Delta;z as a row of a matrix
-    <span class="mono">M<sub>f</sub></span>. This pilot has %%N_GRAVITY%% gravity pairs, %%N_RESTITUTION%%
-    restitution, %%N_FRICTION%% friction, %%N_VELOCITY%% velocity (friction and velocity each lost one
-    pair to the visibility gate):</p>
+    <p>For one factor (e.g. gravity: two levels &times; %%N_WORLDS%% worlds), stack every &Delta;z as a row
+    of a matrix <span class="mono">M<sub>f</sub></span>. This confirmatory run has %%N_GRAVITY%% gravity
+    pairs, %%N_RESTITUTION%% restitution, %%N_FRICTION%% friction, %%N_VELOCITY%% velocity (velocity lost a
+    handful of pairs to the visibility gate; the others are exactly 2&times;%%N_WORLDS%%):</p>
     $$M_f \in \mathbb{R}^{n_f \times 32{,}768}, \qquad (M_f)_{i,:} = \Delta z_i$$
   </div>
 
@@ -234,11 +234,13 @@ footer a { color: var(--text-secondary); }
       <p class="mono">&sigma; = %%GRAVITY_SV%%</p>
       <p class="mono">cumulative energy = %%GRAVITY_CUMENERGY%%</p>
       <p class="mono">r&#8330;&#8320; = %%GRAVITY_R90%% (out of %%N_GRAVITY%% possible ranks)</p>
-      <p>r90 sits almost at the sample count for every factor (see appendix table) &mdash; with this few
-      rows in a 32,768-dimensional space, SVD can <em>always</em> reconstruct 90% of the energy in close
-      to <span class="mono">n&minus;1</span> directions regardless of any real structure. This is a sample-size
-      ceiling, not evidence of a compact code; it only becomes informative once <span class="mono">n</span> is
-      much larger than the rank being tested, which needs the confirmatory study's hundreds of pairs.</p>
+      <p>At this scale (%%N_GRAVITY%%&ndash;%%N_VELOCITY%% pairs per factor, versus 8&ndash;10 in the earlier
+      25-world pilot), r90 is far below the sample count for every factor &mdash; the pilot's concern that
+      SVD could trivially reconstruct 90% of the energy in close to <span class="mono">n&minus;1</span>
+      directions no longer applies. r90 now ranges %%R90_RANGE%% out of 2,400 (see appendix table), and the
+      ordering across factors is itself informative: restitution's effect is the most compact
+      (r90=%%RESTITUTION_R90%%), friction's the least (r90=%%FRICTION_R90%%) &mdash; the reverse of what the
+      pilot's noisy 8&ndash;10-pair estimate suggested.</p>
     </div>
   </div>
 
@@ -261,9 +263,10 @@ footer a { color: var(--text-secondary); }
     never saw. For each held-out world <span class="mono">w</span>:</p>
     $$V_{-w} = \text{top-}r\text{ right singular vectors of } M_f \text{ fit on all rows except world } w$$
     $$\text{retention}_i = 1 - \frac{\Vert \Delta z_i - \Delta z_i V_{-w}^\top V_{-w} \Vert^2}{\Vert \Delta z_i \Vert^2}, \qquad \text{for each } \Delta z_i \text{ belonging to world } w$$
-    <p>Average every fold's retentions together. Rank is capped at %%RANK_USED%% here because
-    leave-one-world-out needs at least <span class="mono">rank+1</span> training rows, and this pilot has
-    only %%N_WORLDS%% worlds.</p>
+    <p>Average every fold's retentions together. Rank is capped at %%RANK_USED%% here, matching the
+    confirmatory design's specified rank exactly &mdash; at %%N_WORLDS%% worlds there is no need to cap it
+    down further, since leave-one-world-out only needs at least <span class="mono">rank+1</span> training
+    rows out of %%N_WORLDS%%.</p>
     <div class="worked">
       <div class="label">Worked example &mdash; gravity, rank %%RANK_USED%%</div>
       <p class="mono">per-pair retention (%%N_WORLDS%% held-out worlds &times; 2 doses = %%N_GRAVITY%% values, first 10 shown) = %%GRAVITY_PERFOLD%%</p>
@@ -275,8 +278,9 @@ footer a { color: var(--text-secondary); }
       the subspace's orientation. Here that is:</p>
       $$\mathbb{E}[\text{retention}_{\text{random}}] = \frac{r}{d} = \frac{%%RANK_USED%%}{%%FEATURE_DIM%%} \approx %%CHANCE_LEVEL%%$$
       <p>Every factor's observed retention (%%RETENTION_RANGE%%) sits far above this %%CHANCE_LEVEL%% floor
-      &mdash; a real sign the embedding responds to these interventions in a structured way &mdash; but the
-      values are still small in absolute terms and noisy across only %%N_WORLDS%% folds.</p>
+      &mdash; a real sign the embedding responds to these interventions in a structured way. Three of the
+      four factors (gravity, restitution, velocity) retain well over chance in absolute terms too, averaged
+      over %%N_WORLDS%% held-out folds; friction is the outlier, barely above the chance floor.</p>
     </div>
   </div>
 
@@ -295,9 +299,13 @@ footer a { color: var(--text-secondary); }
       <div class="overflow-x"><table>
         %%SPECIFICITY_TABLE%%
       </table></div>
-      <p>No row's diagonal cell clearly beats every off-diagonal cell in its row (e.g. friction's basis
-      explains more of gravity's held-out variation than gravity's own basis does) &mdash; an honest null
-      at this sample size, not evidence against specificity.</p>
+      <p>Three of the four rows' diagonal cells clearly beat every off-diagonal cell: gravity's own basis
+      (0.667) beats the next-best (restitution's basis on gravity, 0.331) by more than 2&times;; restitution's
+      own basis (0.727) beats gravity's basis on restitution (0.277) the same way; velocity's own basis
+      (0.485) leads its row too. Friction is the exception &mdash; its own diagonal (0.096) is actually beaten
+      by velocity's basis (0.131) &mdash; consistent with friction's near-zero mean-shift energy fraction and
+      chance-level retention above: this factor's effect on the embedding does not separate into its own
+      compact, factor-specific direction the way the other three do.</p>
     </div>
   </div>
 
@@ -317,12 +325,13 @@ footer a { color: var(--text-secondary); }
 
   <footer>
     Generated by <code>experiment/dashboard/build_methods_report.py</code> from
-    <code>experiment/results/final_pilot/pilot_analysis.json</code> and the pilot's saved feature vectors
+    <code>experiment/results/confirmatory/pilot_analysis.json</code> and this run's saved feature vectors
     &mdash; every number above is read directly from that run's output (or re-derived from the same
     deterministic seed, as noted in stage 01), not illustrative. See the companion
-    <code>pilot_dashboard.html</code> for the charts these numbers feed, and
+    <code>pilot_dashboard.html</code> for the charts these numbers feed,
     <code>01_3D_VJEPA_Research_Agenda.docx</code> / <code>02_3D_VJEPA_Mathematical_Framework.docx</code> for
-    the full confirmatory-study design these formulas implement a pilot-scale version of.
+    the design these formulas implement at the exact scale specified, and
+    <code>experiment/EXPERIMENT_LOG.md</code> for the full run history.
   </footer>
 </div>
 <script>
@@ -344,18 +353,19 @@ footer a { color: var(--text-secondary); }
 def main():
     base = os.path.dirname(os.path.abspath(__file__))
     exp_dir = os.path.dirname(base)
-    pilot_dir = os.path.join(exp_dir, "data", "final_pilot")
-    results_dir = os.path.join(exp_dir, "results", "final_pilot")
+    pilot_dir = os.path.join(exp_dir, "data", "confirmatory")
+    results_dir = os.path.join(exp_dir, "results", "confirmatory")
 
     with open(os.path.join(base, "assets", "katex-embedded.css")) as f:
         katex_css = f.read()
 
-    with open(os.path.join(pilot_dir, "manifest.json")) as f:
-        manifest = json.load(f)
     with open(os.path.join(results_dir, "pilot_analysis.json")) as f:
         analysis = json.load(f)
 
-    root_seed = manifest["root_seed"]
+    # ROOT_SEED = 42 is a module-level constant in sim/generate_states.py, not a
+    # per-run value stored in a manifest (the confirmatory run's manifest.json
+    # lives only on the remote pod's persistent volume, not checked out locally).
+    root_seed = 42
     anchor = sample_anchor(root_seed, 0)  # world000; deterministic, matches sim/world.py exactly
     z_base = np.load(os.path.join(pilot_dir, "features", "world000_baseline.npy"))
     z_grav = np.load(os.path.join(pilot_dir, "features", "world000_gravity_high.npy"))
@@ -368,6 +378,7 @@ def main():
 
     all_means = [analysis["per_factor"][f]["loWO_rank_retention"]["mean_retention"] for f in FACTOR_ORDER
                  if f in analysis["per_factor"]]
+    all_r90 = [analysis["per_factor"][f]["r90"] for f in FACTOR_ORDER if f in analysis["per_factor"]]
 
     values = {
         "ROOT_SEED": str(root_seed),
@@ -397,8 +408,12 @@ def main():
         "RANK_USED": str(rank), "FEATURE_DIM": f"{d:,}".replace(",", "{,}"),
         "FEATURE_DIM_PLAIN": f"{d:,}",
         "N_WORLDS": str(analysis["n_worlds"]),
+        "N_ACCEPTED_CLIPS": f"{analysis['n_accepted_clips']:,}",
         "CHANCE_LEVEL": f"{chance:.6f}",
         "RETENTION_RANGE": f"{min(all_means):.3f}–{max(all_means):.3f}",
+        "R90_RANGE": f"{min(all_r90)}–{max(all_r90)}",
+        "RESTITUTION_R90": str(analysis["per_factor"]["restitution"]["r90"]),
+        "FRICTION_R90": str(analysis["per_factor"]["friction"]["r90"]),
         "MODEL_ID": analysis["model_id"], "WEIGHTS_HASH": analysis["weights_hash"],
 
         "SPECIFICITY_TABLE": build_specificity_table(analysis["specificity_matrix"]),

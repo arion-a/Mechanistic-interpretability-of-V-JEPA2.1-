@@ -64,9 +64,9 @@ footer { color: var(--muted); font-size: 12.5px; margin-top: 40px; line-height: 
 footer a { color: var(--text-secondary); }
 </style>
 <div class="wrap">
-  <h1>Intervention Geometry Methods</h1>
-  <p class="subtitle">Every transformation from simulator state to each number and figure in the pilot dashboard, worked through with this run's own real values.</p>
-  <p class="crossref">Companion to the results dashboard &middot; source: <code>experiment/analysis/svd_analysis.py</code> and <code>experiment/encode/encode_pilot.py</code> in the repository.</p>
+  <h1>Intervention Geometry Methods &mdash; Confirmatory Study</h1>
+  <p class="subtitle">Every transformation from simulator state to each number and figure in the confirmatory-study dashboard, worked through with this run's own real values (N=1200 worlds, 10,797 clips).</p>
+  <p class="crossref">Companion to the results dashboard &middot; source: <code>experiment/analysis/svd_analysis.py</code> and <code>experiment/remote/encode_and_sweep.py</code> in the repository.</p>
 
   <div class="pipeline">
     <div class="step">1&nbsp;&middot;&nbsp;simulate state</div><div class="arrow">&rarr;</div>
@@ -133,8 +133,8 @@ footer a { color: var(--text-secondary); }
     blurred average, per the design doc's extraction contract.</p>
     <div class="worked">
       <div class="label">Worked example &mdash; world000_baseline's z (first 5 of 32,768 numbers)</div>
-      <p class="mono">z = [-0.7696, -0.3473, -0.2296, 0.2350, 1.1714, \ldots]</p>
-      <p class="mono">&Vert;z&Vert; = 366.6509</p>
+      <p class="mono">z = [-0.8214, -0.4973, -0.2552, 0.2567, 1.1396, \ldots]</p>
+      <p class="mono">&Vert;z&Vert; = 365.4728</p>
     </div>
   </div>
 
@@ -146,19 +146,19 @@ footer a { color: var(--text-secondary); }
     $$\Delta z = z(\text{intervention clip}) - z(\text{baseline clip}) \ \in\ \mathbb{R}^{32{,}768}$$
     <div class="worked">
       <div class="label">Worked example &mdash; world000, gravity: 9.8 &rarr; 12.25 m/s&sup2;</div>
-      <p class="mono">z(baseline)[:5]       = [-0.7696, -0.3473, -0.2296, 0.2350, 1.1714, \ldots]</p>
-      <p class="mono">z(gravity_high)[:5]   = [-0.7590, -0.3641, -0.3068, 0.2633, 1.1021, \ldots]</p>
-      <p class="mono">&Delta;z[:5]              = [0.0106, -0.0168, -0.0772, 0.0284, -0.0694, \ldots]</p>
-      <p class="mono">&Vert;&Delta;z&Vert; = 36.3909 &nbsp; (versus &Vert;z&Vert; &asymp; 366.6509 &mdash; the intervention moves the representation by about 9.9% of its own length)</p>
+      <p class="mono">z(baseline)[:5]       = [-0.8214, -0.4973, -0.2552, 0.2567, 1.1396, \ldots]</p>
+      <p class="mono">z(gravity_high)[:5]   = [-0.8056, -0.5129, -0.3428, 0.1830, 1.0644, \ldots]</p>
+      <p class="mono">&Delta;z[:5]              = [0.0158, -0.0156, -0.0876, -0.0737, -0.0752, \ldots]</p>
+      <p class="mono">&Vert;&Delta;z&Vert; = 35.4574 &nbsp; (versus &Vert;z&Vert; &asymp; 365.4728 &mdash; the intervention moves the representation by about 9.7% of its own length)</p>
     </div>
   </div>
 
   <h2><span class="stage-num">06</span>Stacking &Delta;z per factor</h2>
   <div class="card">
-    <p>For one factor (e.g. gravity: two levels &times; 5 worlds), stack every &Delta;z as a row of a matrix
-    <span class="mono">M<sub>f</sub></span>. This pilot has 50 gravity pairs, 50
-    restitution, 50 friction, 50 velocity (friction and velocity each lost one
-    pair to the visibility gate):</p>
+    <p>For one factor (e.g. gravity: two levels &times; 1200 worlds), stack every &Delta;z as a row
+    of a matrix <span class="mono">M<sub>f</sub></span>. This confirmatory run has 2400 gravity
+    pairs, 2400 restitution, 2400 friction, 2397 velocity (velocity lost a
+    handful of pairs to the visibility gate; the others are exactly 2&times;1200):</p>
     $$M_f \in \mathbb{R}^{n_f \times 32{,}768}, \qquad (M_f)_{i,:} = \Delta z_i$$
   </div>
 
@@ -173,15 +173,17 @@ footer a { color: var(--text-secondary); }
     primary "total effect" geometry the design doc calls for (as opposed to centered SVD, which would
     first subtract the per-factor mean and describe variation <em>around</em> that mean).</p>
     <div class="worked">
-      <div class="label">Worked example &mdash; gravity's 50 singular values</div>
-      <p class="mono">&sigma; = [147.73, 120.92, 106.93, 87.35, 69.51, 60.89, 47.35, 42.26, 39.19, 37.30, \ldots]</p>
-      <p class="mono">cumulative energy = [0.2481, 0.4143, 0.5443, 0.6311, 0.6860, 0.7281, 0.7536, 0.7739, 0.7914, 0.8072, \ldots]</p>
-      <p class="mono">r&#8330;&#8320; = 21 (out of 50 possible ranks)</p>
-      <p>r90 sits almost at the sample count for every factor (see appendix table) &mdash; with this few
-      rows in a 32,768-dimensional space, SVD can <em>always</em> reconstruct 90% of the energy in close
-      to <span class="mono">n&minus;1</span> directions regardless of any real structure. This is a sample-size
-      ceiling, not evidence of a compact code; it only becomes informative once <span class="mono">n</span> is
-      much larger than the rank being tested, which needs the confirmatory study's hundreds of pairs.</p>
+      <div class="label">Worked example &mdash; gravity's 2400 singular values</div>
+      <p class="mono">&sigma; = [1098.85, 699.64, 690.77, 547.49, 441.88, 372.25, 279.85, 277.16, 234.17, 227.00, \ldots]</p>
+      <p class="mono">cumulative energy = [0.2816, 0.3958, 0.5071, 0.5770, 0.6225, 0.6549, 0.6731, 0.6910, 0.7038, 0.7158, \ldots]</p>
+      <p class="mono">r&#8330;&#8320; = 105 (out of 2400 possible ranks)</p>
+      <p>At this scale (2400&ndash;2397 pairs per factor, versus 8&ndash;10 in the earlier
+      25-world pilot), r90 is far below the sample count for every factor &mdash; the pilot's concern that
+      SVD could trivially reconstruct 90% of the energy in close to <span class="mono">n&minus;1</span>
+      directions no longer applies. r90 now ranges 46–142 out of 2,400 (see appendix table), and the
+      ordering across factors is itself informative: restitution's effect is the most compact
+      (r90=46), friction's the least (r90=142) &mdash; the reverse of what the
+      pilot's noisy 8&ndash;10-pair estimate suggested.</p>
     </div>
   </div>
 
@@ -192,8 +194,8 @@ footer a { color: var(--text-secondary); }
     $$m_f = \frac{1}{n_f}\sum_{i=1}^{n_f} \Delta z_i, \qquad \text{fraction} = \frac{\Vert m_f \Vert^2}{\frac{1}{n_f}\sum_i \Vert \Delta z_i \Vert^2}$$
     <div class="worked">
       <div class="label">Worked example &mdash; gravity</div>
-      <p class="mono">&Vert;m<sub>gravity</sub>&Vert; = 9.6930, fraction = 0.0534</p>
-      <p>Roughly 5.3% of gravity's effect is a single consistent shift; the rest
+      <p class="mono">&Vert;m<sub>gravity</sub>&Vert; = 7.9063, fraction = 0.0350</p>
+      <p>Roughly 3.5% of gravity's effect is a single consistent shift; the rest
       varies by world &mdash; the effect is not purely additive.</p>
     </div>
   </div>
@@ -204,22 +206,24 @@ footer a { color: var(--text-secondary); }
     never saw. For each held-out world <span class="mono">w</span>:</p>
     $$V_{-w} = \text{top-}r\text{ right singular vectors of } M_f \text{ fit on all rows except world } w$$
     $$\text{retention}_i = 1 - \frac{\Vert \Delta z_i - \Delta z_i V_{-w}^\top V_{-w} \Vert^2}{\Vert \Delta z_i \Vert^2}, \qquad \text{for each } \Delta z_i \text{ belonging to world } w$$
-    <p>Average every fold's retentions together. Rank is capped at 8 here because
-    leave-one-world-out needs at least <span class="mono">rank+1</span> training rows, and this pilot has
-    only 25 worlds.</p>
+    <p>Average every fold's retentions together. Rank is capped at 8 here, matching the
+    confirmatory design's specified rank exactly &mdash; at 1200 worlds there is no need to cap it
+    down further, since leave-one-world-out only needs at least <span class="mono">rank+1</span> training
+    rows out of 1200.</p>
     <div class="worked">
       <div class="label">Worked example &mdash; gravity, rank 8</div>
-      <p class="mono">per-pair retention (25 held-out worlds &times; 2 doses = 50 values, first 10 shown) = [0.5691, 0.7264, 0.6965, 0.5879, 0.6833, 0.6674, 0.6983, 0.6914, 0.5480, 0.6758, \ldots]</p>
-      <p class="mono">mean retention = 0.6380</p>
+      <p class="mono">per-pair retention (1200 held-out worlds &times; 2 doses = 2400 values, first 10 shown) = [0.7878, 0.6866, 0.6848, 0.6095, 0.7636, 0.7355, 0.7389, 0.7620, 0.6848, 0.5336, \ldots]</p>
+      <p class="mono">mean retention = 0.6668</p>
       <p><strong>Chance-level comparison:</strong> a random rank-8 subspace in a
       32,768-dimensional space captures, in expectation, exactly
       <span class="mono">rank/dim</span> of a fixed vector's energy by symmetry &mdash; a uniformly random
       unit vector's squared component along any fixed r-dimensional subspace averages to r/d regardless of
       the subspace's orientation. Here that is:</p>
       $$\mathbb{E}[\text{retention}_{\text{random}}] = \frac{r}{d} = \frac{8}{32{,}768} \approx 0.000244$$
-      <p>Every factor's observed retention (0.037–0.678) sits far above this 0.000244 floor
-      &mdash; a real sign the embedding responds to these interventions in a structured way &mdash; but the
-      values are still small in absolute terms and noisy across only 25 folds.</p>
+      <p>Every factor's observed retention (0.096–0.727) sits far above this 0.000244 floor
+      &mdash; a real sign the embedding responds to these interventions in a structured way. Three of the
+      four factors (gravity, restitution, velocity) retain well over chance in absolute terms too, averaged
+      over 1200 held-out folds; friction is the outlier, barely above the chance floor.</p>
     </div>
   </div>
 
@@ -237,14 +241,18 @@ footer a { color: var(--text-secondary); }
       <div class="label">Full 4&times;4 result (rows = fitted basis, columns = tested factor)</div>
       <div class="overflow-x"><table>
         <tr><th></th><th>gravity</th><th>restitution</th><th>friction</th><th>velocity</th></tr>
-<tr><th>gravity</th><td class="mono">0.6380</td><td class="mono">0.2934</td><td class="mono">0.0304</td><td class="mono">0.0477</td></tr>
-<tr><th>restitution</th><td class="mono">0.2986</td><td class="mono">0.6780</td><td class="mono">0.0309</td><td class="mono">0.0446</td></tr>
-<tr><th>friction</th><td class="mono">0.0213</td><td class="mono">0.0188</td><td class="mono">0.0369</td><td class="mono">0.0545</td></tr>
-<tr><th>velocity</th><td class="mono">0.0377</td><td class="mono">0.0485</td><td class="mono">0.0617</td><td class="mono">0.3909</td></tr>
+<tr><th>gravity</th><td class="mono">0.6668</td><td class="mono">0.3314</td><td class="mono">0.0262</td><td class="mono">0.0421</td></tr>
+<tr><th>restitution</th><td class="mono">0.2770</td><td class="mono">0.7268</td><td class="mono">0.0221</td><td class="mono">0.0528</td></tr>
+<tr><th>friction</th><td class="mono">0.0665</td><td class="mono">0.0547</td><td class="mono">0.0963</td><td class="mono">0.1308</td></tr>
+<tr><th>velocity</th><td class="mono">0.0458</td><td class="mono">0.0542</td><td class="mono">0.0740</td><td class="mono">0.4846</td></tr>
       </table></div>
-      <p>No row's diagonal cell clearly beats every off-diagonal cell in its row (e.g. friction's basis
-      explains more of gravity's held-out variation than gravity's own basis does) &mdash; an honest null
-      at this sample size, not evidence against specificity.</p>
+      <p>Three of the four rows' diagonal cells clearly beat every off-diagonal cell: gravity's own basis
+      (0.667) beats the next-best (restitution's basis on gravity, 0.331) by more than 2&times;; restitution's
+      own basis (0.727) beats gravity's basis on restitution (0.277) the same way; velocity's own basis
+      (0.485) leads its row too. Friction is the exception &mdash; its own diagonal (0.096) is actually beaten
+      by velocity's basis (0.131) &mdash; consistent with friction's near-zero mean-shift energy fraction and
+      chance-level retention above: this factor's effect on the embedding does not separate into its own
+      compact, factor-specific direction the way the other three do.</p>
     </div>
   </div>
 
@@ -254,25 +262,26 @@ footer a { color: var(--text-secondary); }
       <thead><tr><th>Factor</th><th>Pairs (n<sub>f</sub>)</th><th>Top-5 &sigma;</th><th>r90</th>
       <th>&Vert;mean &Delta;z&Vert;</th><th>Mean-shift fraction</th><th>LOWO retention</th></tr></thead>
       <tbody>
-        <tr><td>gravity</td><td>50</td><td class="mono">147.73, 120.92, 106.93, 87.35, 69.51, &hellip;</td><td>21</td><td>9.693</td><td>0.0534</td><td>0.6380</td></tr>
-<tr><td>restitution</td><td>50</td><td class="mono">263.96, 177.32, 136.11, 98.09, 79.77, &hellip;</td><td>17</td><td>27.729</td><td>0.2091</td><td>0.6780</td></tr>
-<tr><td>friction</td><td>50</td><td class="mono">9.26, 8.66, 6.91, 5.62, 2.43, &hellip;</td><td>4</td><td>0.321</td><td>0.0208</td><td>0.0369</td></tr>
-<tr><td>velocity</td><td>50</td><td class="mono">173.59, 121.45, 94.18, 87.00, 79.23, &hellip;</td><td>28</td><td>9.807</td><td>0.0371</td><td>0.3909</td></tr>
+        <tr><td>gravity</td><td>2400</td><td class="mono">1098.85, 699.64, 690.77, 547.49, 441.88, &hellip;</td><td>105</td><td>7.906</td><td>0.0350</td><td>0.6668</td></tr>
+<tr><td>restitution</td><td>2400</td><td class="mono">1883.05, 1210.14, 897.05, 598.54, 543.14, &hellip;</td><td>46</td><td>28.074</td><td>0.2033</td><td>0.7268</td></tr>
+<tr><td>friction</td><td>2400</td><td class="mono">44.15, 29.64, 24.75, 21.21, 20.42, &hellip;</td><td>142</td><td>0.060</td><td>0.0005</td><td>0.0963</td></tr>
+<tr><td>velocity</td><td>2397</td><td class="mono">1270.84, 869.05, 611.34, 536.86, 486.90, &hellip;</td><td>133</td><td>8.785</td><td>0.0260</td><td>0.4846</td></tr>
       </tbody>
     </table></div>
     <p style="margin-top:14px">Feature dimension d = 32,768 = 32 time-tubelets &times; 1,024
-    hidden width. Rank used for LOWO/specificity = 8. Base worlds = 25. Model:
-    <code>facebook/vjepa2-vitl-fpc64-256</code> (weights hash <code>not_recorded_by_sweeper</code>).</p>
+    hidden width. Rank used for LOWO/specificity = 8. Base worlds = 1200. Model:
+    <code>facebook/vjepa2-vitl-fpc64-256</code> (weights hash <code>712c235142eba2e1</code>).</p>
   </div>
 
   <footer>
     Generated by <code>experiment/dashboard/build_methods_report.py</code> from
-    <code>experiment/results/final_pilot/pilot_analysis.json</code> and the pilot's saved feature vectors
+    <code>experiment/results/confirmatory/pilot_analysis.json</code> and this run's saved feature vectors
     &mdash; every number above is read directly from that run's output (or re-derived from the same
     deterministic seed, as noted in stage 01), not illustrative. See the companion
-    <code>pilot_dashboard.html</code> for the charts these numbers feed, and
+    <code>pilot_dashboard.html</code> for the charts these numbers feed,
     <code>01_3D_VJEPA_Research_Agenda.docx</code> / <code>02_3D_VJEPA_Mathematical_Framework.docx</code> for
-    the full confirmatory-study design these formulas implement a pilot-scale version of.
+    the design these formulas implement at the exact scale specified, and
+    <code>experiment/EXPERIMENT_LOG.md</code> for the full run history.
   </footer>
 </div>
 <script>

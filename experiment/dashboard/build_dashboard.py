@@ -1,10 +1,10 @@
-"""Build a self-contained HTML dashboard from the pilot analysis results.
+"""Build a self-contained HTML dashboard from the confirmatory-study analysis
+results.
 
-Reads data/final_pilot/manifest.json + results/final_pilot/pilot_analysis.json
-(+ a couple of real rendered sample clips for grounding) and emits a static
-HTML report. No chart library: axes/lines/bars/heatmap are plain inline SVG
-computed here, sized to the real data so labels always match ticks the chart
-reaches.
+Reads results/confirmatory/pilot_analysis.json (+ a couple of real rendered
+sample clips for grounding) and emits a static HTML report. No chart
+library: axes/lines/bars/heatmap are plain inline SVG computed here, sized to
+the real data so labels always match ticks the chart reaches.
 """
 from __future__ import annotations
 
@@ -178,12 +178,9 @@ def retention_bars_svg(analysis: dict, width=560, height=260) -> str:
 def main():
     base = os.path.dirname(os.path.abspath(__file__))
     exp_dir = os.path.dirname(base)
-    pilot_dir = os.path.join(exp_dir, "data", "final_pilot")
-    results_dir = os.path.join(exp_dir, "results", "final_pilot")
+    results_dir = os.path.join(exp_dir, "results", "confirmatory")
     samples_dir = os.path.join(exp_dir, "samples")
 
-    with open(os.path.join(pilot_dir, "manifest.json")) as f:
-        manifest = json.load(f)
     with open(os.path.join(results_dir, "pilot_analysis.json")) as f:
         analysis = json.load(f)
 
@@ -322,27 +319,26 @@ footer a {{ color: var(--text-secondary); }}
 code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-size: 12px; }}
 </style>
 <div class="wrap">
-  <h1>Intervention Geometry Pilot</h1>
+  <h1>Intervention Geometry &mdash; Confirmatory Study</h1>
   <p class="subtitle">V-JEPA 2 embedding response to one-factor physics interventions on a simulated falling/bouncing sphere</p>
 
   <div class="pilot-banner">
-    <strong>Engineering pilot, not yet the confirmatory study &mdash; but a fully validated pipeline.</strong>
-    {analysis['pilot_scale_caveat']}
-    This run replaces an earlier CPU/TinyRenderer pilot whose underlying video data had real, confirmed defects
-    (an unresolvably small sphere, motion that froze after ~2s, a lighting artifact that looked like a second
-    ball, and a camera angle that made real bounces visually unreadable). Every one of those was root-caused
-    against real position/velocity data and fixed before this run: GPU-rendered with Blender EEVEE (the design
-    doc's sanctioned renderer, not the TinyRenderer smoke-test path), a shallow &minus;15&deg; camera that
-    shows the true bounce arc, corrected lighting, and a bounded speed range that keeps the sphere continuously
-    moving and resolvable (~24px) for the full 6s clip. Model: <code>{analysis['model_id']}</code>, a documented
-    substitution for the docx's unpublished ViT-B/16 384px checkpoint.
+    <strong>This is the confirmatory study, at design-doc scale.</strong>
+    {analysis['n_worlds']} base worlds, {analysis['n_accepted_clips']} accepted clips, GPU-rendered with Blender
+    EEVEE on the fully validated v4 pipeline (correct camera, physics, and lighting &mdash; see the methods
+    report for the calibration history). This run also survived a real mid-run infrastructure interruption:
+    the GPU pod crashed partway through with ~88% of clips already encoded; the persistent volume's data was
+    verified byte-for-byte intact (manifest checksum match), and the remaining clips were regenerated and
+    encoded to finish the exact same deterministic dataset &mdash; every one of the {analysis['n_accepted_clips']}
+    clips below is accounted for, none silently dropped or duplicated. Model: <code>{analysis['model_id']}</code>,
+    a documented substitution for the docx's unpublished ViT-B/16 384px checkpoint.
   </div>
 
   <div class="card">
     <h2>Run metadata</h2>
     <div class="meta-grid">
-      <div class="meta-item"><div class="label">Base worlds</div><div class="value">{analysis['n_worlds']}</div></div>
-      <div class="meta-item"><div class="label">Accepted clips</div><div class="value">{analysis['n_accepted_clips']}</div></div>
+      <div class="meta-item"><div class="label">Base worlds</div><div class="value">{analysis['n_worlds']:,}</div></div>
+      <div class="meta-item"><div class="label">Accepted clips</div><div class="value">{analysis['n_accepted_clips']:,}</div></div>
       <div class="meta-item"><div class="label">Feature dim</div><div class="value">{analysis['feature_dim']:,}</div></div>
       <div class="meta-item"><div class="label">Rank used</div><div class="value">{analysis['rank_used']}</div></div>
       <div class="meta-item"><div class="label">Weights hash</div><div class="value">{analysis['weights_hash']}</div></div>
@@ -350,15 +346,13 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
     <p class="desc" style="margin-top:14px">
       <strong>Base world</strong>: one random starting position/velocity for the sphere, simulated once per
       physics setting (baseline plus each intervention), so every version of a world starts identically and
-      only the one changed constant differs. <strong>Accepted clips</strong>: all 225 rendered clips (25
-      worlds &times; 9 versions) passed the visibility check described below &mdash; 0 rejected, unlike the
-      earlier pilot's 2/45. <strong>Feature dim = 32,768</strong>: explained in the next card.
-      <strong>Rank used = 8</strong>: this now matches the docx's confirmatory-design rank exactly (the earlier
-      5-world pilot could only support rank 3). <strong>Weights hash</strong>: a fingerprint of the exact
-      V-JEPA weights used; the concurrent encode daemon that produced this run's features didn't record it
-      (a logging gap fixed for future runs), so it reads as a placeholder rather than a real hash here &mdash;
-      it does not affect any number below, all of which came from the one <code>{analysis['model_id']}</code>
-      checkpoint loaded for this run.
+      only the one changed constant differs. <strong>Accepted clips</strong>: 10,797 of 10,800 rendered clips
+      (1,200 worlds &times; 9 versions) passed the visibility check described below &mdash; only 3 rejected,
+      a 0.03% rate. <strong>Feature dim = 32,768</strong>: explained in the next card.
+      <strong>Rank used = 8</strong>: this matches the docx's confirmatory-design rank exactly &mdash; at this
+      scale there's no need to cap it down the way the 25-world engineering pilot had to (rank 3). <strong>Weights
+      hash</strong>: a real fingerprint of the exact V-JEPA weights used for every clip in this run, confirmed
+      identical across the pre-crash and post-recovery encoding passes.
     </p>
   </div>
 
@@ -408,12 +402,15 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
         <p><strong>r90</strong> = the smallest r where that fraction reaches 90%. A truly compact code would
         keep r90 small and flat no matter how many worlds you add.</p>
         <div class="kicker">What the result actually shows here</div>
-        <p>r90 ranges 4 (friction) to 28 (velocity) out of 50 &Delta;z pairs per factor &mdash; friction's
-        spectrum is genuinely compact (90% of its energy in just 4 directions), while velocity and gravity
-        need most of their available rank. With 50 pairs per factor (versus 9&ndash;10 in the earlier 5-world
-        pilot), r90 is no longer automatically pinned near the sample count, so this is a first real read on
-        compactness rather than a sample-size artifact &mdash; though the docx's confirmatory design (hundreds
-        of pairs) is still what would make these numbers precise.</p>
+        <p>With 2,400 &Delta;z pairs per factor (2,397 for velocity), r90 is nowhere near the sample count
+        anymore &mdash; this is a real read on compactness, not a small-sample artifact. r90 ranges from 46
+        (restitution) to 142 (friction) out of 2,400: restitution's effect is the most concentrated (90% of
+        its energy in under 2% of the available directions), while friction's is the most spread out (90%
+        needs nearly 6%). That ordering is the opposite of what the 25-world pilot suggested, where friction
+        looked most compact &mdash; at pilot scale, r90 for a near-zero effect (see friction's mean-shift
+        fraction below) mostly reflected noise structure in too few samples, not a real property of the
+        signal. None of the four factors are extremely low-rank in the docx's strictest sense (r90 &#8811; 8),
+        but all sit far below full rank (2,400), consistent with a structured, if not maximally compact, code.</p>
       </div>
       {spectrum_html}
     </div>
@@ -435,16 +432,18 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
         so every cell &mdash; diagonal included &mdash; is tested on data its basis never saw.</p>
         <div class="kicker">What the result actually shows here</div>
         <p><strong>Gravity, restitution, and velocity are each specific</strong>: each factor's own diagonal
-        cell is the largest value in its row (gravity 0.638, restitution 0.678, velocity 0.391), meaning each
+        cell is the largest value in its row (gravity 0.667, restitution 0.727, velocity 0.485), meaning each
         factor's basis reconstructs its own held-out effect far better than any other factor's basis does.
-        Gravity and restitution show real cross-talk with each other (gravity's basis retains 0.299 of
-        restitution's effect, and vice versa 0.293) &mdash; physically sensible, since both act on the sphere's
-        vertical dynamics. <strong>Friction shows no specificity</strong>: its own diagonal (0.037) is the
-        <em>smallest</em> value in its row &mdash; velocity's basis (0.062) explains friction's held-out
-        variation better than friction's own basis does. Combined with friction's very low mean-shift energy
-        fraction (2%) and tiny effect norm below, this suggests V-JEPA's embedding barely registers this
-        friction range as a distinct signal at all, rather than registering it as a signal that gets confused
-        with other factors.</p>
+        All three retention values are <em>higher</em> than the 25-world pilot found (0.638, 0.678, 0.391) &mdash;
+        the pattern didn't just survive 48&times; more data, it got stronger, which is what a real effect should
+        do as sample size grows. Gravity and restitution show real cross-talk with each other (gravity's basis
+        retains 0.331 of restitution's effect, restitution's retains 0.277 of gravity's) &mdash; physically
+        sensible, since both act on the sphere's vertical dynamics. <strong>Friction still shows no
+        specificity</strong>: its own diagonal (0.096) is <em>not</em> the largest value in its row &mdash;
+        velocity's basis (0.131) explains friction's held-out variation better than friction's own basis does.
+        Friction's mean-shift energy fraction (visible below) is essentially zero at this scale, reinforcing
+        that V-JEPA's embedding barely registers this friction range as a distinct signal, rather than
+        registering it as a signal that gets confused with other factors.</p>
       </div>
       {heatmap_html}
     </div>
@@ -462,16 +461,16 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
         <li>Fit a rank-8 uncentered SVD basis on the remaining worlds' &Delta;z vectors only.</li>
         <li>Project the held-out world's &Delta;z onto that basis and measure retained energy (same formula
         as the specificity matrix).</li>
-        <li>Repeat once per world (25 folds here), average the 25 retention values.</li>
+        <li>Repeat once per world (1,200 folds here), average the 1,200 retention values.</li>
       </ol>
       <div class="kicker">A number to calibrate against</div>
       <p>A random rank-8 direction in a 32,768-dimensional space would be expected to explain about
       rank / dimension = 8 / 32,768 &asymp; 0.00024 of a held-out vector's energy purely by chance (the math
-      memo's H&#8320;-geometry null). Every bar below (0.037&ndash;0.678) sits far above that chance floor.
-      Gravity, restitution, and velocity all clear 0.39&ndash;0.68 &mdash; a strong, structured signal, not
-      noise. Friction sits at 0.037: still ~150&times; the chance floor, so the model is not completely blind
-      to friction, but two orders of magnitude weaker than the other three factors and (per the specificity
-      matrix) not even the best-explaining basis for its own effect.</p>
+      memo's H&#8320;-geometry null). Every bar below (0.096&ndash;0.727) sits far above that chance floor.
+      Gravity, restitution, and velocity all clear 0.48&ndash;0.73 &mdash; a strong, structured signal, not
+      noise, now measured across 1,200 held-out folds instead of 25. Friction sits at 0.096: well above the
+      chance floor, so the model is not completely blind to friction, but well below the other three factors
+      and (per the specificity matrix) still not even the best-explaining basis for its own effect.</p>
     </div>
     <p class="desc">Fit rank-{analysis['rank_used']} basis on all-but-one world, measure retained energy on the held-out world's &Delta;z. Dots are individual folds (n={analysis['n_worlds']}).</p>
     {bars_html}
@@ -484,9 +483,11 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
       <p>What share of a factor's average &Delta;z-squared-length is explained just by one single "always
       shift this way" vector (the mean of all its &Delta;z), versus needing a different direction per world:</p>
       <span class="formula">fraction = &Vert;mean(&Delta;z)&Vert;&sup2; / mean(&Vert;&Delta;z&Vert;&sup2;)</span>
-      <p>Low across the board (2&ndash;21%) &mdash; every factor's effect direction depends noticeably on the
-      specific world rather than being one constant shift added to every embedding. Restitution is highest
-      (21%): changing bounciness produces the most world-independent, consistent embedding shift of the four.</p>
+      <p>Low across the board except restitution &mdash; every factor's effect direction depends noticeably on
+      the specific world rather than being one constant shift added to every embedding. Restitution is by far
+      the highest (20%): changing bounciness produces the most world-independent, consistent embedding shift
+      of the four. Friction is essentially zero (0.05%) &mdash; consistent with everything else on this page,
+      its effect doesn't even have a consistent <em>average</em> direction, let alone a specific one.</p>
     </div>
     <table>
       <thead><tr><th>Factor</th><th>Pairs</th><th>r90</th><th>Mean-shift energy frac.</th><th>LOWO retention</th></tr></thead>
@@ -495,15 +496,15 @@ code {{ background: var(--gridline); padding: 1px 5px; border-radius: 4px; font-
   </div>
 
   <footer>
-    Generated from a {analysis['n_worlds']}-world, {analysis['n_accepted_clips']}-clip pilot run on a GPU pod
-    with Blender EEVEE rendering &mdash; the same renderer, camera, and physics settings the confirmatory study
-    will use, just at 25 worlds instead of 1,200. Every number on this page comes from that run; the
-    gravity/restitution/velocity specificity result is a real, structured signal well above chance, and the
-    friction null result is likewise real, not a rendering or physics artifact &mdash; see the companion
-    methods report for how each number was computed. What this pilot does <em>not</em> yet establish is
-    statistical power at the scale of <code>01_3D_VJEPA_Research_Agenda.docx</code>'s full 1,200-world design;
-    that confirmatory run is the next step. Source: <code>experiment/analysis/svd_analysis.py</code> and
-    <code>experiment/dashboard/build_dashboard.py</code> in this repository.
+    Generated from the full {analysis['n_worlds']:,}-world, {analysis['n_accepted_clips']:,}-clip confirmatory
+    run on a GPU pod with Blender EEVEE rendering, at the exact scale
+    <code>01_3D_VJEPA_Research_Agenda.docx</code> specifies. Every number on this page comes from that run;
+    the gravity/restitution/velocity specificity result is a real, structured signal that held up and grew
+    stronger from the 25-world pilot to this 1,200-world confirmatory scale, and the friction null result is
+    likewise real, not a rendering, physics, or small-sample artifact &mdash; see the companion methods report
+    for how each number was computed, and <code>experiment/EXPERIMENT_LOG.md</code> for the full run history,
+    including the mid-run infrastructure recovery. Source: <code>experiment/analysis/svd_analysis.py</code>
+    and <code>experiment/dashboard/build_dashboard.py</code> in this repository.
   </footer>
 </div>
 """
