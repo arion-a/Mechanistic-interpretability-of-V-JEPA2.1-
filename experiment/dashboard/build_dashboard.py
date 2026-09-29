@@ -225,7 +225,7 @@ def main():
             f'<td>{ret["mean_retention"]:.3f} (n={ret["n_folds"]})</td></tr>'
         )
 
-    html = f"""<title>Intervention Geometry Pilot</title>
+    html = f"""<title>Intervention Geometry — Confirmatory Study</title>
 <style>
 :root {{
   color-scheme: light;

@@ -56,7 +56,7 @@ def build_specificity_table(spec: dict) -> str:
     return "\n".join(rows)
 
 
-TEMPLATE = r"""<title>Intervention Geometry Methods</title>
+TEMPLATE = r"""<title>Intervention Geometry Methods — Confirmatory Study</title>
 <style>
 %%KATEX_CSS%%
 </style>
