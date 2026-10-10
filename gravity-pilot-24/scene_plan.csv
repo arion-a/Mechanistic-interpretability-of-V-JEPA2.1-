@@ -1,0 +1,25 @@
+clip_id,filename,scene,x0,y0,gravity_idx,g,color_idx,color,rgb,target_x4,target_y4
+s00_g98_orange,s00_g98_orange.mkv,0,-40,140,0,9.8,0,orange,235 100 60,-32.0,61.6
+s00_g98_blue,s00_g98_blue.mkv,0,-40,140,0,9.8,1,blue,60 140 235,-32.0,61.6
+s00_g49_orange,s00_g49_orange.mkv,0,-40,140,1,4.9,0,orange,235 100 60,-32.0,100.8
+s00_g49_blue,s00_g49_blue.mkv,0,-40,140,1,4.9,1,blue,60 140 235,-32.0,100.8
+s01_g98_orange,s01_g98_orange.mkv,1,0,140,0,9.8,0,orange,235 100 60,8.0,61.6
+s01_g98_blue,s01_g98_blue.mkv,1,0,140,0,9.8,1,blue,60 140 235,8.0,61.6
+s01_g49_orange,s01_g49_orange.mkv,1,0,140,1,4.9,0,orange,235 100 60,8.0,100.8
+s01_g49_blue,s01_g49_blue.mkv,1,0,140,1,4.9,1,blue,60 140 235,8.0,100.8
+s02_g98_orange,s02_g98_orange.mkv,2,40,140,0,9.8,0,orange,235 100 60,48.0,61.6
+s02_g98_blue,s02_g98_blue.mkv,2,40,140,0,9.8,1,blue,60 140 235,48.0,61.6
+s02_g49_orange,s02_g49_orange.mkv,2,40,140,1,4.9,0,orange,235 100 60,48.0,100.8
+s02_g49_blue,s02_g49_blue.mkv,2,40,140,1,4.9,1,blue,60 140 235,48.0,100.8
+s03_g98_orange,s03_g98_orange.mkv,3,-40,160,0,9.8,0,orange,235 100 60,-32.0,81.6
+s03_g98_blue,s03_g98_blue.mkv,3,-40,160,0,9.8,1,blue,60 140 235,-32.0,81.6
+s03_g49_orange,s03_g49_orange.mkv,3,-40,160,1,4.9,0,orange,235 100 60,-32.0,120.8
+s03_g49_blue,s03_g49_blue.mkv,3,-40,160,1,4.9,1,blue,60 140 235,-32.0,120.8
+s04_g98_orange,s04_g98_orange.mkv,4,0,160,0,9.8,0,orange,235 100 60,8.0,81.6
+s04_g98_blue,s04_g98_blue.mkv,4,0,160,0,9.8,1,blue,60 140 235,8.0,81.6
+s04_g49_orange,s04_g49_orange.mkv,4,0,160,1,4.9,0,orange,235 100 60,8.0,120.8
+s04_g49_blue,s04_g49_blue.mkv,4,0,160,1,4.9,1,blue,60 140 235,8.0,120.8
+s05_g98_orange,s05_g98_orange.mkv,5,40,160,0,9.8,0,orange,235 100 60,48.0,81.6
+s05_g98_blue,s05_g98_blue.mkv,5,40,160,0,9.8,1,blue,60 140 235,48.0,81.6
+s05_g49_orange,s05_g49_orange.mkv,5,40,160,1,4.9,0,orange,235 100 60,48.0,120.8
+s05_g49_blue,s05_g49_blue.mkv,5,40,160,1,4.9,1,blue,60 140 235,48.0,120.8

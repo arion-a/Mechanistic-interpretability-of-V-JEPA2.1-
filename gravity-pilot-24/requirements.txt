@@ -1,0 +1,5 @@
+# Stage A (video generation / validation / software checks) — versions to be pinned when the environment is chosen
+numpy
+Pillow
+imageio-ffmpeg   # or system ffmpeg with FFV1 + RGB-native pix_fmt (see INCONSISTENCY_REVIEW I-07)
+# Stage B (only after dataset approval): torch + the V-JEPA 2 repo at revision 204698b45b3712590f06245fbfba32d3be539812

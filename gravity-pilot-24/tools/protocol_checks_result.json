@@ -1,0 +1,148 @@
+{
+ "numpy": "2.5.3",
+ "projection_sha256_reference": "2a754eade0be27ac5840532226b95ad010cd849f130e1ada2459056ca1c6da2c",
+ "E_CV": 16.52817123714675,
+ "E_prior": 19.6,
+ "checks": [
+  {
+   "check": "24 clips, 24 unique filenames",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "each scene has 4 clips; each fold 20/4 split",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "training set per fold is 10 orange / 10 blue / 10 per gravity",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "six start positions as stated",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "151 frames, last timestamp 5 s, playback 151/30",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "observed indices 0..60 step 4, t_l=2l/15, last t=2 s",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "target frame 120 is t=4 s",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "worked check s=0 targets (-32,61.6),(-32,100.8)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "s=0 baseline-gravity y(5)=17.5",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "centres lie in x[-40,50], y[17.5,160]",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "ball (r=9.6 px) fully inside 384x384 for all frames",
+   "pass": true,
+   "detail": "u[115.2,288.0] v[76.8,350.4]"
+  },
+  {
+   "check": "5 m radius -> 9.6 px; 200 m -> 384 px",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "encoder tokens 8x24x24 = 4608",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "paired colour clips share identical true targets",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "CV error 32/15*g: 20.9066667 / 10.4533333",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "prior displacement (8,-58.8)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "prior error 19.6 m for both gravities",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "aggregate RMSE = sqrt(mean of squared errors), not mean of errors",
+   "pass": true,
+   "detail": "E_CV=16.528171"
+  },
+  {
+   "check": "FINDING: min(E_CV,E_prior)=E_CV, so 'beat both' reduces to 'beat CV'",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "storage: 3072 B, 64 B, 48x, 97.9167%, 73728, 1536, 49152, 50688",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "scalar RMS scaling gives unit total training variance",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "dual ridge == primal ridge",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "unpenalised intercept: mean fitted = mean target",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "target offset moves only the intercept",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "tie-to-orange: score 0 -> orange (c=1[score>0])",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "projection reproducible within one environment",
+   "pass": true,
+   "detail": "numpy 2.5.3 sha256 2a754eade0be27ac5840532226b95ad010cd849f130e1ada2459056ca1c6da2c"
+  },
+  {
+   "check": "projection entries are +/-0.25; 1/sqrt(16)=1/4",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "projection scale 1/sqrt(16) is removed by scalar RMS scaling (note)",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}
