@@ -11,6 +11,8 @@ A small, pre-specified test of whether frozen V-JEPA 2.1 ViT-B features from the
 | [`protocol/MATHEMATICAL_PROTOCOL.md`](protocol/MATHEMATICAL_PROTOCOL.md) | Markdown transcription of the PDF (PDF governs) |
 | [`pilot_config.json`](pilot_config.json), [`scene_plan.csv`](scene_plan.csv) | Derived from the protocol (originals not supplied) |
 | [`tools/protocol_checks.py`](tools/protocol_checks.py) | Software-only recomputation of every stated number (28/28 pass) |
+| [`protocol/DATASET_V2_CONFOUND_REDUCED.md`](protocol/DATASET_V2_CONFOUND_REDUCED.md), [`dataset_v2/`](dataset_v2) | **Pending approval:** 48-clip confound-reduced dataset (no shadow, luminance-matched colours, 12 start positions) |
+| [`results/followup_f1_seed_sweep/RESULTS_F1.md`](results/followup_f1_seed_sweep/RESULTS_F1.md) | Follow-up F1: 101 projection seeds (1/101 pass the primary rule) |
 | [`results/RESULTS.md`](results/RESULTS.md) | **Results**, tables, caveats; plots, predictions.csv, summary.json, provenance.json beside it |
 | [`protocol/DATASET_V1_1_CHANGES.md`](protocol/DATASET_V1_1_CHANGES.md) | Every deviation of the clips from protocol v1.0 (read before approving) |
 | [`pilot.py`](pilot.py), [`dataset/`](dataset) | Stage A generator/validator and its 24 clips, manifest, validation, gallery |

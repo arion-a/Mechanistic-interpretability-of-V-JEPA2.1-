@@ -1,0 +1,127 @@
+{
+ "manifest_sha256": "75ea34ed4ce6806bd1d065db80c76dcc6e39cc4422c0a548477813c4b0ebb6ed",
+ "all_passed": true,
+ "failures": [],
+ "checks": [
+  {
+   "check": "exactly 48 clips in manifest",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "exactly 48 .mkv files, names match manifest",
+   "pass": true,
+   "detail": "48 files"
+  },
+  {
+   "check": "manifest matches current config + generator hashes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "all file SHA-256 match manifest",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "codec ffv1, pix_fmt bgr0, 384x384, 271 packets",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "271 packets in order; timestamps = k/30 s within 0.5 ms (Matroska 1-ms timebase), last = 9.0 s",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "lossless round-trip: decoded RGB == rendered frames, all 48x271 frames",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "ball fully visible in every frame (>=90% of disc pixels, inside canvas)",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "detected ball centroid within sqrt(2)/2 px (half-pixel per axis, raster quantisation) of analytic trajectory",
+   "pass": true,
+   "detail": "max observed 0.566 px = 0.295 m; []"
+  },
+  {
+   "check": "centroid error is unbiased: |mean dx|,|mean dy| < 0.05 px over all 48x271 frames",
+   "pass": true,
+   "detail": "mean dx 0.0032, dy -0.0041 px"
+  },
+  {
+   "check": "colour pairs have identical trajectories (centroids) and identical targets",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "first frames identical across gravities within each scene/colour",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "check": "manifest targets equal analytic (x0+8, y0-8g) AND equal the bounce-aware trajectory at t=4 s",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "first impact is after the 4 s target and within the clip (so the target is bounce-free and the bounce is visible)",
+   "pass": true,
+   "detail": "9.8/120:4.84s, 4.9/120:6.85s, 9.8/120:4.84s, 4.9/120:6.85s"
+  },
+  {
+   "check": "ball centre never below the ground contact height y=5 m (no penetration)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "every clip shows a landing and a rebound (centre rises after first impact)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "bounce energy: first rebound apex = 5 + e^2 (y0-5)  [scene 0, g=9.8]",
+   "pass": true,
+   "detail": "46.400"
+  },
+  {
+   "check": "centre trajectory equals the free-fall formula at every frame before first impact",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "colour pair luminance-matched: Rec.709 relative luminance equal within 0.5 %",
+   "pass": true,
+   "detail": "orange 0.2710, blue 0.2702"
+  },
+  {
+   "check": "no shadow in v2 (static scene + ball only): frame with ball differs from scene only inside the ball disc",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "each of 12 start positions has 4 clips; colours/gravities balanced",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "encoder input tensor unchanged when frames 61-150 are modified",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "encoder input shape [1,3,16,384,384] float32",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "negative control: modifying frame 60 DOES change the tensor",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

@@ -61,6 +61,14 @@ Primary prediction-retention result: **not met** (E_full 12.17 m, E_projected 22
 * **Not done / not claimed:** no best-seed selection, no other dimensions or learned projections, pilot's primary result unchanged.
 * **Also requested the same turn: "remove the known confounds"** (colour not luminance-matched, ground-shadow position cue, only six start-position groups). This needs new clips and a new approval gate — see Session 6.
 
+## 2026-10-10 — Session 6: dataset v2.0 (confound-reduced) — generated and validated, awaiting approval
+* **Request:** "also remove the known confounds" (luminance-matched colours, drop shadow cue, more start positions).
+* **Finding:** the colour-luminance confound was smaller than I had assumed (relative luminance 0.2710 vs 0.2571, 5 %; mean RGB 10 %).
+* **Built:** `pilot_v2.py` + `pilot_config_v2.json` → `dataset_v2/` (48 clips, 12 start positions, no shadow, blue (62,143,241)). 24/24 validation checks pass. Manifest SHA-256 `75ea34ed4ce6806bd1d065db80c76dcc6e39cc4422c0a548477813c4b0ebb6ed`. Details: `protocol/DATASET_V2_CONFOUND_REDUCED.md`.
+* **Process:** `pilot.py` and all v1.1 artifacts untouched (their hashes remain valid). `pilot_v2.py extract` refuses (no receipt). The 104 MB of lossless clips are gitignored; regenerate and verify against the manifest.
+* **Not done:** no approval receipt for v2, no inference, no Stage B code for 48 clips / 12 folds yet.
+* **STOP — awaiting user approval of the v2 clips.**
+
 ## Entry template
 ```
 ## YYYY-MM-DD — Session N: <title>

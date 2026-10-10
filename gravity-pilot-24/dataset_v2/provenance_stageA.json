@@ -1,0 +1,12 @@
+{
+ "stage": "A",
+ "python": "3.13.16 (main, Oct  1 2026, 15:40:24) [GCC 13.3.0]",
+ "platform": "Linux-6.18.44-fc-v114-x86_64-with-glibc2.39",
+ "numpy": "2.5.3",
+ "pillow": "12.3.0",
+ "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+ "git_sha": "9a47cd93d08e233a7d0bf1f401697b3f1f13367c",
+ "manifest_sha256": "75ea34ed4ce6806bd1d065db80c76dcc6e39cc4422c0a548477813c4b0ebb6ed",
+ "model_loaded": false,
+ "inference_performed": false
+}
