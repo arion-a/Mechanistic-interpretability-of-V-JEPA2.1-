@@ -1,0 +1,47 @@
+{
+ "n_seeds": 101,
+ "seeds": "20261009 (pilot) + 20261010..20261109",
+ "E_full_m": 12.16650502836344,
+ "bar_m": 16.52817123714676,
+ "rho_tolerance": 1.1,
+ "seeds_passing_primary_rule": 1,
+ "seeds_with_E_below_bar": 13,
+ "fraction_passing_primary": 0.009900990099009901,
+ "E_projected_m": {
+  "min": 11.986067695262323,
+  "p25": 18.066646262435295,
+  "median": 20.200254427856375,
+  "p75": 22.970092380011682,
+  "max": 33.58471734479656
+ },
+ "rho": {
+  "min": 0.9851693372352645,
+  "p25": 1.4849495578489482,
+  "median": 1.6603169423564184,
+  "p75": 1.8879778807851666,
+  "max": 2.760424400146256
+ },
+ "color_correct_of_24": {
+  "min": 20,
+  "median": 24.0,
+  "max": 24,
+  "seeds_24_of_24": 83
+ },
+ "groups_beating_both_baselines": {
+  "median": 2.0,
+  "max": 6
+ },
+ "J_projected_m": {
+  "min": 7.37645407696781,
+  "p25": 10.2139622662799,
+  "median": 11.944431222338197,
+  "p75": 13.645042459393254,
+  "max": 20.7011442801533
+ },
+ "original_seed_20261009": {
+  "E_projected_m": 22.316878868679737,
+  "rho": 1.8342883857486605,
+  "rank_of_E_among_101_ascending": 70
+ },
+ "caveat": "Descriptive; same 24 clips and 6 groups; no significance claim; no seed is selected as 'best'."
+}

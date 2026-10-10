@@ -54,6 +54,13 @@ Primary prediction-retention result: **not met** (E_full 12.17 m, E_projected 22
   4. `provenance.json` field `git_sha` is the commit at run time (parent of the commit holding the final `report_plots.py` edit); `code_sha256` is authoritative and equals the SHA of the committed code files.
 * **Not done:** no new seeds/penalties/layers/dims/gravities/scenes, no significance claims, no further experiments (per protocol §10.8).
 
+## 2026-10-10 — Session 5: follow-up F1 (projection-seed sweep) — user-requested "option 2 with more seeds"
+* **Pre-specification** committed before running (`protocol/FOLLOWUP_F1_SEED_SWEEP.md`, commit c5b35e3): 100 new seeds 20261010–20261109 plus the pilot seed; dimension fixed at 16; no new inference; report all seeds; no significance claims.
+* **Run:** `python3 seed_sweep.py` (CPU, seconds). Validity check passed: seed 20261009 reproduces the pilot's E_projected, colour count, J and projection hash exactly. Plot labels were reworked once (presentation only; numbers re-verified identical).
+* **Result:** 1/101 seeds pass the primary rule; 13/101 below the bar; median E_proj 20.2 m, median ρ 1.66; colour 24/24 in 83/101 seeds. Conclusion: the pilot failure is typical of random 16-D projections. Details: `results/followup_f1_seed_sweep/RESULTS_F1.md`.
+* **Not done / not claimed:** no best-seed selection, no other dimensions or learned projections, pilot's primary result unchanged.
+* **Also requested the same turn: "remove the known confounds"** (colour not luminance-matched, ground-shadow position cue, only six start-position groups). This needs new clips and a new approval gate — see Session 6.
+
 ## Entry template
 ```
 ## YYYY-MM-DD — Session N: <title>
