@@ -1,5 +1,5 @@
 {
- "manifest_sha256": "7d3baa2bb8b6d0418868d8a89d5edd313f9a41c3392b24301f6f698f8d35c5dd",
+ "manifest_sha256": "7cef53e34ace1c1147e92b79be750efde10d24e9ae794b815d93ec20e4641f52",
  "all_passed": true,
  "failures": [],
  "checks": [
@@ -24,17 +24,17 @@
    "detail": ""
   },
   {
-   "check": "codec ffv1, pix_fmt bgr0, 384x384, 151 packets",
+   "check": "codec ffv1, pix_fmt bgr0, 384x384, 271 packets",
    "pass": true,
    "detail": "[]"
   },
   {
-   "check": "151 packets in order; timestamps = k/30 s within 0.5 ms (Matroska 1-ms timebase), last = 5.0 s",
+   "check": "271 packets in order; timestamps = k/30 s within 0.5 ms (Matroska 1-ms timebase), last = 9.0 s",
    "pass": true,
    "detail": "[]"
   },
   {
-   "check": "lossless round-trip: decoded RGB == rendered frames, all 24x151 frames",
+   "check": "lossless round-trip: decoded RGB == rendered frames, all 24x271 frames",
    "pass": true,
    "detail": "[]"
   },
@@ -49,9 +49,9 @@
    "detail": "max observed 0.566 px = 0.295 m; []"
   },
   {
-   "check": "centroid error is unbiased: |mean dx|,|mean dy| < 0.05 px over all 24x151 frames",
+   "check": "centroid error is unbiased: |mean dx|,|mean dy| < 0.05 px over all 24x271 frames",
    "pass": true,
-   "detail": "mean dx -0.0007, dy -0.0159 px"
+   "detail": "mean dx -0.0008, dy -0.0105 px"
   },
   {
    "check": "colour pairs have identical trajectories (centroids) and identical targets",
@@ -64,7 +64,32 @@
    "detail": "[]"
   },
   {
-   "check": "manifest targets equal analytic (x0+8, y0-8g)",
+   "check": "manifest targets equal analytic (x0+8, y0-8g) AND equal the bounce-aware trajectory at t=4 s",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "first impact is after the 4 s target and within the clip (so the target is bounce-free and the bounce is visible)",
+   "pass": true,
+   "detail": "9.8/140:5.25s, 4.9/140:7.42s, 9.8/160:5.62s, 4.9/160:7.95s"
+  },
+  {
+   "check": "ball centre never below the ground contact height y=5 m (no penetration)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "every clip shows a landing and a rebound (centre rises after first impact)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "bounce energy: first rebound apex = 5 + e^2 (y0-5)  [scene 0, g=9.8]",
+   "pass": true,
+   "detail": "53.600"
+  },
+  {
+   "check": "first 5 s of centre trajectory identical to v1.0 free-fall formula",
    "pass": true,
    "detail": ""
   },

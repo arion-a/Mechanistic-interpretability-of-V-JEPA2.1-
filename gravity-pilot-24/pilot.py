@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""24-video gravity pilot, protocol v1.0 — Stage A implementation (generate / validate / gallery).
+"""24-video gravity pilot — Stage A implementation (generate / validate / gallery). DATASET v1.1 (shaded scene, ground, bounce, 9 s clips;
+see protocol/DATASET_V1_1_CHANGES.md for every deviation from protocol v1.0).
 
 Commands
   generate         render the 24 lossless FFV1 clips + manifest.json (deterministic; no timestamps)
@@ -21,11 +22,16 @@ DS = ROOT / "dataset"
 VID = DS / "videos"
 CFG = json.loads((ROOT / "pilot_config.json").read_text())
 
-SIZE, FPS, NFRAMES, PXM, RPX = 384, 30, 151, 1.92, 9.6
+SIZE, FPS, NFRAMES, PXM, RPX = 384, 30, 271, 1.92, 9.6  # v1.1: 271 frames = 9.0 s simulated (v1.0: 151)
+Y_TOP = 175.0      # world y at pixel row 0 (v1.0: 200). Shifts the view down 25 m so a ground strip is visible; scale unchanged.
+GROUND_V = PXM * Y_TOP   # pixel row of the ground surface (world y = 0) = 336
+BALL_R = 5.0
+E_REST = 0.6       # coefficient of restitution (fixed, not tuned)
 GRAV = (9.8, 4.9)
 COLORS = (("orange", (235, 100, 60)), ("blue", (60, 140, 235)))
-BG, GRID = (32, 32, 32), (44, 44, 44)
-GRID_LINES = list(range(0, 381, 38))
+SHADOW_K = 0.70
+LIGHT = np.array([-0.45, -0.55, 0.70]); LIGHT = LIGHT / np.linalg.norm(LIGHT)
+_H = LIGHT + np.array([0, 0, 1.0]); HALF = _H / np.linalg.norm(_H)
 OBS_IDX = [4 * l for l in range(16)]
 MEAN = np.array([0.485, 0.456, 0.406], dtype=np.float32)
 STD = np.array([0.229, 0.224, 0.225], dtype=np.float32)
@@ -53,25 +59,78 @@ def clip_list():
     return out
 
 
-def center(x0, y0, g, t):  # float64 world coordinates, metres
-    return x0 + 2.0 * t, y0 - 0.5 * g * t * t
+def hit_time(y0, g):
+    return math.sqrt(2.0 * (y0 - BALL_R) / g)
+
+
+def center(x0, y0, g, t, e=E_REST):
+    """float64 world centre (m). Free fall until the ball bottom touches y=0 (centre y=5), then bounces with
+    restitution e (vertical only; no friction, constant vx). Identical to the v1.0 formula before the first impact."""
+    x = x0 + 2.0 * t
+    t1 = hit_time(y0, g)
+    if t <= t1:
+        return x, y0 - 0.5 * g * t * t
+    tau, v = t - t1, e * g * t1
+    for _ in range(60):
+        T = 2.0 * v / g
+        if tau <= T or v < 1e-9:
+            break
+        tau -= T
+        v *= e
+    return x, BALL_R + v * tau - 0.5 * g * tau * tau
 
 
 def to_px(x, y):
-    return PXM * (x + 100.0), PXM * (200.0 - y)
+    return PXM * (x + 100.0), PXM * (Y_TOP - y)
 
 
-def render_frame(x0, y0, g, rgb, k, ball=True):
+_BG = None
+
+
+def background():
+    global _BG
+    if _BG is None:
+        bg = np.zeros((SIZE, SIZE, 3), np.float64)
+        top, hor = np.array([196, 208, 224.0]), np.array([236, 236, 228.0])
+        f = np.clip(np.arange(SIZE) / GROUND_V, 0, 1)[:, None]
+        bg[:] = (top * (1 - f) + hor * f)[:, None, :]
+        r = np.arange(SIZE)[:, None]
+        g0 = int(round(GROUND_V))
+        stripe = ((r - g0) // 12) % 2
+        ground = np.where(stripe[..., None] == 0, np.array([84, 138, 76.0]), np.array([92, 148, 84.0]))
+        gx = (np.arange(SIZE)[None, :] % 38 == 0)[..., None]  # faint vertical mow lines
+        ground = ground + gx * 6.0
+        bg[g0:] = ground[g0:]
+        bg[g0] = (58, 98, 54)  # horizon / contact line
+        _BG = np.rint(bg).astype(np.uint8)
+    return _BG
+
+
+def render_frame(x0, y0, g, rgb, k, layers="full"):
+    """layers: 'bg' = static scene; 'shadow' = bg + shadow; 'full' = bg + shadow + shaded ball. No antialiasing."""
+    fr = background().copy()
+    if layers == "bg":
+        return fr
     t = k / FPS
-    img = Image.new("RGB", (SIZE, SIZE), BG)
-    d = ImageDraw.Draw(img)
-    for p in GRID_LINES:  # 1-px lines, drawn under the ball (pins review item I-08)
-        d.line([(p, 0), (p, SIZE - 1)], fill=GRID, width=1)
-        d.line([(0, p), (SIZE - 1, p)], fill=GRID, width=1)
-    if ball:
-        u, v = to_px(*center(x0, y0, g, t))
-        d.ellipse((u - RPX, v - RPX, u + RPX, v + RPX), fill=tuple(rgb))
-    return np.asarray(img, dtype=np.uint8)
+    u, v = to_px(*center(x0, y0, g, t))
+    sh = Image.new("L", (SIZE, SIZE), 0)
+    sv = GROUND_V + 14.0
+    ImageDraw.Draw(sh).ellipse((u - RPX, sv - 4.5, u + RPX, sv + 4.5), fill=255)
+    m = np.asarray(sh) > 0
+    fr[m] = np.rint(fr[m].astype(np.float64) * SHADOW_K).astype(np.uint8)
+    if layers == "shadow":
+        return fr
+    bm = Image.new("L", (SIZE, SIZE), 0)
+    ImageDraw.Draw(bm).ellipse((u - RPX, v - RPX, u + RPX, v + RPX), fill=255)
+    ys, xs = np.nonzero(np.asarray(bm) > 0)
+    dx, dy = (xs + 0.5 - u) / RPX, (ys + 0.5 - v) / RPX
+    nz = np.sqrt(np.clip(1.0 - dx * dx - dy * dy, 0, None))
+    n = np.stack([dx, dy, nz], 1)
+    diff = np.clip(n @ LIGHT, 0, None)
+    spec = np.clip(n @ HALF, 0, None) ** 40
+    col = np.array(rgb, np.float64)[None, :] * (0.55 + 0.50 * diff)[:, None] + 255.0 * 0.45 * spec[:, None]
+    fr[ys, xs] = np.rint(np.clip(col, 0, 255)).astype(np.uint8)
+    return fr
 
 
 def render_clip(c):
@@ -106,8 +165,9 @@ def build_encoder_input(frames):
     return np.ascontiguousarray(sel.transpose(3, 0, 1, 2)[None])
 
 
-def centroid(frame, rgb):
-    m = np.all(frame == np.array(rgb, np.uint8), axis=-1)
+def centroid(frame, ref_shadow_frame):
+    """Ball centroid detected from decoded pixels: pixels that differ from the static scene + shadow render."""
+    m = np.any(frame != ref_shadow_frame, axis=-1)
     if not m.any():
         return None
     ys, xs = np.nonzero(m)
@@ -124,11 +184,11 @@ def cmd_generate(_):
         ffmpeg_encode(frames, p)
         tx, ty = center(c["x0"], c["y0"], c["g"], 4.0)
         clips.append({**c, "filename": f"videos/{c['clip_id']}.mkv", "n_frames": NFRAMES, "fps": FPS, "size": [SIZE, SIZE],
-                      "timestamps": "k/30 s, k=0..150", "codec": "ffv1", "container": "matroska", "pix_fmt": PIX_FMT,
+                      "timestamps": "k/30 s, k=0..270", "codec": "ffv1", "container": "matroska", "pix_fmt": PIX_FMT,
                       "target_t4_m": [round(tx, 9), round(ty, 9)], "target_frame": 120,
                       "sha256": sha256_file(p), "raw_rgb_frames_sha256": hashlib.sha256(frames.tobytes()).hexdigest()})
         print("wrote", p.name)
-    manifest = {"protocol_version": "1.0", "n_clips": len(clips), "config_sha256": sha256_file(ROOT / "pilot_config.json"),
+    manifest = {"protocol_version": "1.0", "dataset_version": "1.1", "n_clips": len(clips), "config_sha256": sha256_file(ROOT / "pilot_config.json"),
                 "generator_code_sha256": sha256_file(Path(__file__)), "observed_frame_indices": OBS_IDX, "clips": clips}
     mp = DS / "manifest.json"
     mp.write_text(json.dumps(manifest, indent=1, sort_keys=True) + "\n")
@@ -176,7 +236,7 @@ def cmd_validate(_):
         worst = 0.0
         errs = []
         for k in range(NFRAMES):
-            ct = centroid(fr[k], c["rgb"])
+            ct = centroid(fr[k], render_frame(c["x0"], c["y0"], c["g"], c["rgb"], k, "shadow"))
             u, v = to_px(*center(c["x0"], c["y0"], c["g"], k / FPS))
             if ct is None or ct[2] < 0.9 * math.pi * RPX ** 2 or u - RPX < 0 or u + RPX > SIZE or v - RPX < 0 or v + RPX > SIZE:
                 vis_fail.append((c["clip_id"], k)); continue
@@ -186,15 +246,15 @@ def cmd_validate(_):
         all_err.append(e)
         if worst > CENTROID_TOL:
             cent_fail.append((c["clip_id"], round(worst, 3)))
-    chk("codec ffv1, pix_fmt bgr0, 384x384, 151 packets", not meta_fail, str(meta_fail))
-    chk("151 packets in order; timestamps = k/30 s within 0.5 ms (Matroska 1-ms timebase), last = 5.0 s", not ts_fail, str(ts_fail))
-    chk("lossless round-trip: decoded RGB == rendered frames, all 24x151 frames", not rt_fail, str(rt_fail))
+    chk("codec ffv1, pix_fmt bgr0, 384x384, 271 packets", not meta_fail, str(meta_fail))
+    chk("271 packets in order; timestamps = k/30 s within 0.5 ms (Matroska 1-ms timebase), last = 9.0 s", not ts_fail, str(ts_fail))
+    chk("lossless round-trip: decoded RGB == rendered frames, all 24x271 frames", not rt_fail, str(rt_fail))
     chk("ball fully visible in every frame (>=90% of disc pixels, inside canvas)", not vis_fail, str(vis_fail[:3]))
     E = np.concatenate(all_err)
     mx = float(np.hypot(E[:, 0], E[:, 1]).max())
     chk(f"detected ball centroid within sqrt(2)/2 px (half-pixel per axis, raster quantisation) of analytic trajectory", not cent_fail,
         f"max observed {mx:.3f} px = {mx / PXM:.3f} m; {cent_fail}")
-    chk("centroid error is unbiased: |mean dx|,|mean dy| < 0.05 px over all 24x151 frames", abs(E[:, 0].mean()) < 0.05 and abs(E[:, 1].mean()) < 0.05,
+    chk("centroid error is unbiased: |mean dx|,|mean dy| < 0.05 px over all 24x271 frames", abs(E[:, 0].mean()) < 0.05 and abs(E[:, 1].mean()) < 0.05,
         f"mean dx {E[:, 0].mean():.4f}, dy {E[:, 1].mean():.4f} px")
     bad_pair, bad_first = [], []
     for s in range(6):
@@ -202,8 +262,11 @@ def cmd_validate(_):
             ids = [c["clip_id"] for c in clips if c["scene"] == s and c["gravity_idx"] == a]
             cs = {c["clip_id"]: c for c in clips}
             o, b = [i for i in ids if i.endswith("orange")][0], [i for i in ids if i.endswith("blue")][0]
-            same = all(math.isclose(centroid(dec[o][k], cs[o]["rgb"])[0], centroid(dec[b][k], cs[b]["rgb"])[0], abs_tol=1e-9) and
-                       math.isclose(centroid(dec[o][k], cs[o]["rgb"])[1], centroid(dec[b][k], cs[b]["rgb"])[1], abs_tol=1e-9) for k in range(NFRAMES))
+            same = True
+            for k in range(0, NFRAMES, 5):
+                ro, rb = (render_frame(cs[i]["x0"], cs[i]["y0"], cs[i]["g"], cs[i]["rgb"], k, "shadow") for i in (o, b))
+                co, cb = centroid(dec[o][k], ro), centroid(dec[b][k], rb)
+                same &= math.isclose(co[0], cb[0], abs_tol=1e-9) and math.isclose(co[1], cb[1], abs_tol=1e-9) and np.array_equal(ro, rb)
             if not same or cs[o]["target_t4_m"] != cs[b]["target_t4_m"]:
                 bad_pair.append((s, a))
         for col in ("orange", "blue"):
@@ -212,8 +275,22 @@ def cmd_validate(_):
                 bad_first.append((s, col))
     chk("colour pairs have identical trajectories (centroids) and identical targets", not bad_pair, str(bad_pair))
     chk("first frames identical across gravities within each scene/colour", not bad_first, str(bad_first))
-    chk("manifest targets equal analytic (x0+8, y0-8g)", all(
-        c["target_t4_m"] == [round(c["x0"] + 8, 9), round(c["y0"] - 8 * c["g"], 9)] for c in clips))
+    chk("manifest targets equal analytic (x0+8, y0-8g) AND equal the bounce-aware trajectory at t=4 s", all(
+        c["target_t4_m"] == [round(c["x0"] + 8, 9), round(c["y0"] - 8 * c["g"], 9)] and
+        all(abs(a - b) < 1e-9 for a, b in zip(center(c["x0"], c["y0"], c["g"], 4.0), c["target_t4_m"])) for c in clips))
+    chk("first impact is after the 4 s target and within the clip (so the target is bounce-free and the bounce is visible)",
+        all(4.0 < hit_time(c["y0"], c["g"]) < (NFRAMES - 1) / FPS for c in clips),
+        ", ".join(f"{c['g']}/{c['y0']}:{hit_time(c['y0'], c['g']):.2f}s" for c in clips if c["scene"] in (0, 3) and c["color"] == "orange"))
+    cy = {c["clip_id"]: np.array([center(c["x0"], c["y0"], c["g"], k / FPS)[1] for k in range(NFRAMES)]) for c in clips}
+    chk("ball centre never below the ground contact height y=5 m (no penetration)", all(v.min() >= BALL_R - 1e-9 for v in cy.values()))
+    chk("every clip shows a landing and a rebound (centre rises after first impact)", all(
+        (cy[c["clip_id"]][int(math.ceil(hit_time(c["y0"], c["g"]) * FPS)) + 3] > cy[c["clip_id"]][int(math.ceil(hit_time(c["y0"], c["g"]) * FPS))]) for c in clips))
+    c0 = clips[0]
+    peak = max(center(c0["x0"], c0["y0"], c0["g"], t / 1000)[1] for t in range(int(hit_time(c0["y0"], c0["g"]) * 1000) + 1, 9000))
+    chk("bounce energy: first rebound apex = 5 + e^2 (y0-5)  [scene 0, g=9.8]", abs(peak - (BALL_R + E_REST ** 2 * (c0["y0"] - BALL_R))) < 0.05, f"{peak:.3f}")
+    chk("first 5 s of centre trajectory identical to v1.0 free-fall formula", all(
+        abs(center(c["x0"], c["y0"], c["g"], k / FPS)[1] - (c["y0"] - 0.5 * c["g"] * (k / FPS) ** 2)) < 1e-9 and k / FPS < hit_time(c["y0"], c["g"])
+        for c in clips for k in range(0, 151)))
     chk("each of 6 scenes has 4 clips; colours/gravities balanced", all(sum(c["scene"] == s for c in clips) == 4 for s in range(6))
         and sum(c["color"] == "orange" for c in clips) == 12 and sum(c["gravity_idx"] == 0 for c in clips) == 12)
     # encoder-input property (software-only, no model): frames 61..150 cannot affect the tensor
@@ -241,7 +318,7 @@ def cmd_gallery(_):
     for c in clips:  # DERIVATIVE: H.264 yuv420p for browser playback; never used for inference
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(DS / c["filename"]), "-c:v", "libx264", "-pix_fmt", "yuv420p",
                         "-crf", "14", "-movflags", "+faststart", str(view / f"{c['clip_id']}.mp4")], check=True)
-    # contact sheet: one tile per clip = first frame with the true centre at t=0,1,..,5 s marked (derivative image)
+    # contact sheet: one tile per clip = first frame with the true centre at t=1..8 s marked (derivative image)
     tile, lab = 192, 34
     sheet = Image.new("RGB", (4 * tile, 6 * (tile + lab)), (20, 20, 20))
     d = ImageDraw.Draw(sheet)
@@ -249,7 +326,7 @@ def cmd_gallery(_):
         r, q = divmod(n, 4)
         fr = Image.fromarray(render_frame(c["x0"], c["y0"], c["g"], c["rgb"], 0))
         fd = ImageDraw.Draw(fr)
-        for tt in range(1, 6):
+        for tt in range(1, 9):
             u, v = to_px(*center(c["x0"], c["y0"], c["g"], float(tt)))
             fd.ellipse((u - 4, v - 4, u + 4, v + 4), outline=(255, 255, 255), width=1)
             fd.text((u + 6, v - 6), f"{tt}s", fill=(255, 255, 255), font=font)
@@ -270,16 +347,27 @@ def cmd_gallery(_):
 <title>Gravity pilot - 24 clips</title>
 <style>body{{font:14px system-ui;margin:16px;background:#fff;color:#111}}td,th{{border:1px solid #ccc;padding:6px;vertical-align:middle}}table{{border-collapse:collapse}}img{{max-width:100%}}
 @media(prefers-color-scheme:dark){{body{{background:#161616;color:#eee}}td,th{{border-color:#444}}a{{color:#8ab4ff}}}}</style>
-<h1>24-video gravity pilot - dataset for approval</h1>
+<h1>24-video gravity pilot - dataset v1.1 for approval</h1>
 <p><b>Protocol v1.0. Dataset not yet approved. No model has been run.</b> Manifest SHA-256: <code>{ms}</code></p>
-<p>Each clip: 384x384, 30 fps, 151 frames (5 s simulated), one ball. Experimental clips are the lossless FFV1 <code>.mkv</code> files in <code>videos/</code>;
+<p>Each clip: 384x384, 30 fps, 271 frames (9 s simulated), one ball that falls, lands and bounces (restitution 0.6). Experimental clips are the lossless FFV1 <code>.mkv</code> files in <code>videos/</code>;
 the <code>.mp4</code> files in <code>viewing/</code> are <b>derivative H.264 copies for browser viewing only and never enter inference</b>.</p>
 <p>Clip counts: 6 start positions x 2 gravities (9.8, 4.9 m/s^2) x 2 colours. Colour pairs share identical trajectories. Encoder would see only the first 2 s (frames 0-60).</p>
-<h2>Contact sheet</h2><p>First frame of each clip; white rings = true centre at 1-5 s; yellow X = target at 4 s (derivative image). Rows are scenes 0-5; columns: g=9.8 orange, g=9.8 blue, g=4.9 orange, g=4.9 blue.</p>
+<h2>Contact sheet</h2><p>First frame of each clip; white rings = true centre at 1-8 s (lowest ring = rebound); yellow X = target at 4 s (derivative image). Rows are scenes 0-5; columns: g=9.8 orange, g=9.8 blue, g=4.9 orange, g=4.9 blue.</p>
 <p><a href="contact_sheet.png"><img src="contact_sheet.png" alt="contact sheet" width=768></a></p>
 <h2>All 24 clips</h2>
 <table><tr><th>clip</th><th>scene</th><th>start (x0,y0) m</th><th>g</th><th>colour</th><th>preview</th><th>links / sha256</th></tr>
 {rows}</table>""")
+    import base64
+    cards = []
+    for c in clips:
+        b = base64.b64encode((view / f"{c['clip_id']}.mp4").read_bytes()).decode()
+        cards.append(f"<div class=c><video src='data:video/mp4;base64,{b}' width=192 height=192 controls loop muted playsinline></video>"
+                     f"<div><b>{c['clip_id']}</b><br>scene {c['scene']} - start ({c['x0']},{c['y0']}) m<br>g={c['g']} - {c['color']}</div></div>")
+    (DS / "gallery_standalone.html").write_text(f"""<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Gravity pilot clips v1.1</title>
+<style>body{{font:14px system-ui;margin:16px;background:#fff;color:#111}}.g{{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}}.c{{border:1px solid #ccc;padding:6px}}
+@media(prefers-color-scheme:dark){{body{{background:#161616;color:#eee}}.c{{border-color:#444}}}}</style>
+<h1>24 clips (dataset v1.1) for approval</h1><p>Derivative H.264 viewing copies (not used for inference). Experimental originals are the lossless FFV1 files in videos/. Manifest SHA-256 <code>{ms}</code>.
+Each clip is 9 s: the ball falls, lands and bounces; the encoder would see only the first 2 s and the target is at 4 s (before any landing).</p><div class=g>{''.join(cards)}</div>""")
     print("gallery written; manifest sha256", ms)
 
 

@@ -7,7 +7,7 @@ Append-only. One entry per session/decision. Record failures and deviations; nev
 |---|---|
 | Docs received & reviewed | done (2026-10-10) |
 | Environment chosen by user | this cloud sandbox (CPU, Python 3.13, ffmpeg 6.1.1, numpy 2.5.3, Pillow 12.3.0) — chosen 2026-10-10 |
-| Stage A: generate / validate 24 clips, gallery | **done — awaiting review** (manifest SHA-256 `7d3baa2b…c5dd`) |
+| Stage A: generate / validate 24 clips, gallery | **done (dataset v1.1) — awaiting review** (manifest SHA-256 `7cef53e3…1f52`; v1.0 clips superseded) |
 | **Dataset approval gate** | **not given** (no receipt) — waiting for user |
 | Stage B: extraction, readers, report | **locked until approval** |
 
@@ -30,7 +30,16 @@ Inference performed: **none**. Checkpoint loaded: **no**. Readers fitted: **no**
 * **Outputs:** `dataset/videos/` (24 FFV1 mkv, 9.2 MB), `manifest.json`, `dataset_validation.json` (17/17 pass), `contact_sheet.png`, `gallery.html`, `viewing/*.mp4` (**derivative** H.264 for viewing only), `provenance_stageA.json`. Manifest SHA-256: `7d3baa2bb8b6d0418868d8a89d5edd313f9a41c3392b24301f6f698f8d35c5dd`. Generation is byte-deterministic (two runs, identical manifest).
 * **Defects / deviations (documented):** first validation run FAILED 2 checks (timestamp tolerance 1e-6 s; centroid tolerance 0.5 px). Diagnosed as over-tight checks, not clip defects — see I-15/I-16; tolerances replaced with justified bounds and an added bias check; clips regenerated and fully re-validated. Later, the pixel format and Pillow version were written into `pilot_config.json`, changing the config hash, so clips were regenerated again; the manifest hash above is from the final run.
 * **Not done:** no checkpoint download, no model load, no embeddings, no readers, no results.
-* **STOP — awaiting user:** inspect `dataset/gallery.html` / `contact_sheet.png` / `videos/`. To approve, the user (not the agent) runs `python3 pilot.py record-approval --manifest-sha256 7d3baa2b… --approver <name> --utc <time>` or tells the agent explicitly to record it. Any dataset edit invalidates the receipt.
+* **STOP — awaiting user:** inspect `dataset/gallery.html` / `contact_sheet.png` / `videos/`. (superseded by Session 3) To approve, the user (not the agent) runs `python3 pilot.py record-approval --manifest-sha256 7d3baa2b… --approver <name> --utc <time>` or tells the agent explicitly to record it. Any dataset edit invalidates the receipt.
+
+## 2026-10-10 — Session 3: dataset v1.1 (user-requested restyle + bounce)
+* **Trigger:** user reviewed v1.0 clips: balls never touch the ground, no bounce, dark flat background. Asked for normal-looking video: colour, 3D feel, normal physics.
+* **Decisions (user):** shaded scene with the same side camera; longer clips so the bounce happens after the 4 s target; user asked whether length changes the calculations — answered no (encoder frames, target, baselines unchanged), then "go ahead". Restitution 0.6 and 9 s were my stated defaults.
+* **Changes:** see `protocol/DATASET_V1_1_CHANGES.md` (ground, sky, shaded ball, shadow, 271 frames, bounce e=0.6, view shifted 25 m so ground is visible).
+* **Validation:** `dataset_validation.json` 22/22 pass, incl. new checks: first impact after 4 s and within the clip, no ground penetration, rebound present, apex = 5+e²(y0−5) = 53.6 m, first 5 s identical to v1.0 formula, frames 61+ do not affect encoder tensor.
+* **Process notes:** v1.0 manifest `7d3baa2b…c5dd` is superseded. New manifest SHA-256 `7cef53e34ace1c1147e92b79be750efde10d24e9ae794b815d93ec20e4641f52`. Lossless videos are now 53 MB total (was 9 MB). Generation remains deterministic.
+* **Not done:** no model, no embeddings, no readers, no results. No approval receipt.
+* **STOP — awaiting user:** inspect clips; approval must reference the new hash.
 
 ## Entry template
 ```

@@ -5,8 +5,8 @@
  "numpy": "2.5.3",
  "pillow": "12.3.0",
  "ffmpeg": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
- "git_sha": "c16c79c417dd59ed471a6ae367672a599b63c234",
- "manifest_sha256": "7d3baa2bb8b6d0418868d8a89d5edd313f9a41c3392b24301f6f698f8d35c5dd",
+ "git_sha": "718d1f81d499ccddb57d75fd96d8d5a408351930",
+ "manifest_sha256": "7cef53e34ace1c1147e92b79be750efde10d24e9ae794b815d93ec20e4641f52",
  "model_loaded": false,
  "inference_performed": false
 }
