@@ -6,9 +6,9 @@ Append-only. One entry per session/decision. Record failures and deviations; nev
 | Stage | State |
 |---|---|
 | Docs received & reviewed | done (2026-10-10) |
-| Environment chosen by user | **pending — user decision** |
-| Stage A: generate / validate 24 clips, gallery | not started |
-| **Dataset approval gate** | **not given** (no receipt) |
+| Environment chosen by user | this cloud sandbox (CPU, Python 3.13, ffmpeg 6.1.1, numpy 2.5.3, Pillow 12.3.0) — chosen 2026-10-10 |
+| Stage A: generate / validate 24 clips, gallery | **done — awaiting review** (manifest SHA-256 `7d3baa2b…c5dd`) |
+| **Dataset approval gate** | **not given** (no receipt) — waiting for user |
 | Stage B: extraction, readers, report | **locked until approval** |
 
 Inference performed: **none**. Checkpoint loaded: **no**. Readers fitted: **no**. Empirical results: **none**.
@@ -22,6 +22,15 @@ Inference performed: **none**. Checkpoint loaded: **no**. Readers fitted: **no**
 * **Not done (by design):** no video generation, no model download, no inference, no changes to existing repo files.
 * **Open decisions for user:** (1) execution environment; (2) I-02 intent; (3) send original `.md`/`.json`/`.csv` if they exist; (4) approve proposed approval-receipt format (I-04).
 * **Next:** after the user picks an environment — pin Pillow/numpy/ffmpeg, implement `generate` + `validate`, build gallery/contact sheet, then STOP for dataset approval.
+
+## 2026-10-10 — Session 2: Stage A (stimulus generation) — decisions and results
+* **User decisions:** execute in this cloud sandbox; keep the literal `min(E_CV, E_prior)` rule (I-02 resolved: it reduces to beating E_CV = 16.528 m; both baselines still reported separately). Experiment re-stated by user as: *does a small JEPA representation preserve future-motion information while colour becomes less accessible, at unseen start positions?* — treated as the same 24-video protocol; wording to be reported as "colour accessibility to a linear reader", not representational insensitivity.
+* **Built:** `pilot.py` (`generate`, `validate`, `gallery`, `record-approval`; `extract` refuses without a matching `approval_receipt.json`; `analyze`/`report` are unimplemented Stage-B stubs).
+* **Run:** `python3 pilot.py generate && python3 pilot.py validate && python3 pilot.py gallery`.
+* **Outputs:** `dataset/videos/` (24 FFV1 mkv, 9.2 MB), `manifest.json`, `dataset_validation.json` (17/17 pass), `contact_sheet.png`, `gallery.html`, `viewing/*.mp4` (**derivative** H.264 for viewing only), `provenance_stageA.json`. Manifest SHA-256: `7d3baa2bb8b6d0418868d8a89d5edd313f9a41c3392b24301f6f698f8d35c5dd`. Generation is byte-deterministic (two runs, identical manifest).
+* **Defects / deviations (documented):** first validation run FAILED 2 checks (timestamp tolerance 1e-6 s; centroid tolerance 0.5 px). Diagnosed as over-tight checks, not clip defects — see I-15/I-16; tolerances replaced with justified bounds and an added bias check; clips regenerated and fully re-validated. Later, the pixel format and Pillow version were written into `pilot_config.json`, changing the config hash, so clips were regenerated again; the manifest hash above is from the final run.
+* **Not done:** no checkpoint download, no model load, no embeddings, no readers, no results.
+* **STOP — awaiting user:** inspect `dataset/gallery.html` / `contact_sheet.png` / `videos/`. To approve, the user (not the agent) runs `python3 pilot.py record-approval --manifest-sha256 7d3baa2b… --approver <name> --utc <time>` or tells the agent explicitly to record it. Any dataset edit invalidates the receipt.
 
 ## Entry template
 ```

@@ -1,0 +1,866 @@
+{
+ "clips": [
+  {
+   "clip_id": "s00_g98_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s00_g98_orange.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 0,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "82eadb836fab078a335542df48feab1de9d5f16bcd783341b08e146a10d5b37c",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 0,
+   "sha256": "0d210b156d05580a89b6f9f449086d2c5c96750300d94e407a9d5969718207e2",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    61.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s00_g98_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s00_g98_blue.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 0,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "26f1244dcc4fa2510e80fc2a3d68f85ff665de4a540e9ab5d71fa964bc70ed23",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 0,
+   "sha256": "e397cf51cecc6a179b2c4a2f9f88c844dab242d0492d7df1364e5bfea4912943",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    61.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s00_g49_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s00_g49_orange.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 0,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "c46f73a8b794901a046e68d89891cdab1c4d0185a03341dd64b06ac128d73f30",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 0,
+   "sha256": "f5289e85070dae7a2cc7fd7dd7c45f5fc6361a3ac6f07dbec53c685c9e5f9dba",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    100.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s00_g49_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s00_g49_blue.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 0,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "e35e926990bd96a926611e2bce98d2670b1a2e33e24ed9ae24bc6aac35215133",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 0,
+   "sha256": "6f72ba12f9793a789d83f7f67e81233856ec1c32a7a19e9afddadc59abef9d10",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    100.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s01_g98_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s01_g98_orange.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 1,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "aa658fb60bd9f483065bfe907ec44cc9f78514e3ae9b6da0dd4a35ee7ffcfc10",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 1,
+   "sha256": "60b46c93ea02a48f32675c9791987f8dbeb545c4d193940e43823ea56353e4d4",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    61.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 140
+  },
+  {
+   "clip_id": "s01_g98_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s01_g98_blue.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 1,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "1f4a32b14cde92f2c703b93f2abd290f59e6855e978e3407b67782b67d625734",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 1,
+   "sha256": "436bf823c4da8f1f034036f3c7934b466cef8f60c9c5c0b0cb6315239e480106",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    61.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 140
+  },
+  {
+   "clip_id": "s01_g49_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s01_g49_orange.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 1,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "be1c3fe89bb24ced787d45cc17648b2c8c45a45e0c014b832f1cb0a2cbd2c96a",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 1,
+   "sha256": "3572b97c6e19e9eeb6c4eaf7ee7500eae7062abae79a4ddc194b778e7dbd5f2b",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    100.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 140
+  },
+  {
+   "clip_id": "s01_g49_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s01_g49_blue.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 1,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "fbfabeb30ce53bcf18d9a1c63bcbf53c93f1d8b18fe7a73bd9448babd9e771d3",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 1,
+   "sha256": "6f07d94a05efe150bb27219a62505d4e88d4e6c72d761009b809b076fe70b2b0",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    100.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 140
+  },
+  {
+   "clip_id": "s02_g98_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s02_g98_orange.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 2,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "21665276516c6c09619ec3f18735a368f77b89f4dd9dd27f5897dc6596f66082",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 2,
+   "sha256": "a373d4d695eb3d81f0f5aa44976a8aa57920b7000e82025e948316b59774042a",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    61.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s02_g98_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s02_g98_blue.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 2,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "a9c890e89699499077d50000f33934b9de7a5073a70ccf7364bda9e033019c65",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 2,
+   "sha256": "7d6d753870b2afd456b0590880dd187887f787cbd374f3a0081764e005741fd3",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    61.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s02_g49_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s02_g49_orange.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 2,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "7ba973089933c7ec225a3c4c0df8326889ed91b652474a8aad5d3acc7bcc657b",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 2,
+   "sha256": "ec6d05c35e190de24480911de31190a4975e928c1f0d15a451bcf5ede68fcbf9",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    100.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s02_g49_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s02_g49_blue.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 2,
+   "j": 0,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "c2dee67fd6a046b78658f2d41d27bd51feabd0ad7abd25480ee2e76d3e4a0f68",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 2,
+   "sha256": "ea39e09116c5cb52058dfc7acbcf7ee77e4d3ca3b3dafbfdddb010b4101cfb18",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    100.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 140
+  },
+  {
+   "clip_id": "s03_g98_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s03_g98_orange.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 0,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "c45bc7f70e9f080867a85a1bed6d2915352cb323473000ca562015fc7289b065",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 3,
+   "sha256": "d897157a0b528c5cf77536410fae1e06b5816af018042040587cbc5ef9e74b5e",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    81.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 160
+  },
+  {
+   "clip_id": "s03_g98_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s03_g98_blue.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 0,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "1bc249128fb740289225c2210c81714070c5a937154cf690e269bcb9adc5c651",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 3,
+   "sha256": "b840adb8dc61f2781419ac6bb9939268c94b9544690b8a160ba2190a36bddb45",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    81.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 160
+  },
+  {
+   "clip_id": "s03_g49_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s03_g49_orange.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 0,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "f702ad521f6bb5e2374fea4582411733f81d09cf4d9bb8132b2bde8473de070a",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 3,
+   "sha256": "92602e88e5c0ca924275cc70300ab86d4d183cac4f3b96093165860b73337e45",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    120.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 160
+  },
+  {
+   "clip_id": "s03_g49_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s03_g49_blue.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 0,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "30ee0261d4eacce0161903e0254488f4915e105f3166dbf808cb5e7b02e3cc66",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 3,
+   "sha256": "b3bed0d4c28c2811b9eb4a1a872bd7ec0633b72ba5ee64d28679d2e6469c1afa",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    -32.0,
+    120.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": -40,
+   "y0": 160
+  },
+  {
+   "clip_id": "s04_g98_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s04_g98_orange.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 1,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "90b5c4f421d0fdb2ee55846f09151d11de4419e37d6f79b0e51ed96059867b51",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 4,
+   "sha256": "1848e99faf931936890341457055824515d1d981cbec2190a725a7aa79a4031f",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    81.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 160
+  },
+  {
+   "clip_id": "s04_g98_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s04_g98_blue.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 1,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "94aeee7e3c978d618c8ef6f8a265d66bf6fc75510e636ffe65edfaeaea9d6c23",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 4,
+   "sha256": "b879332d38d48966ca36698c47c3d9b1dd434b8fc8c76078bba5b1c9736c3ebc",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    81.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 160
+  },
+  {
+   "clip_id": "s04_g49_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s04_g49_orange.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 1,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "996503a78062238b999d63f448dac671c6d33bf9c95ea6363e1ffc5246d51bef",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 4,
+   "sha256": "e2d793ec1d34e0019f56aa02afbb80cf11d9ebd8fa961211404c84969d3faccc",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    120.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 160
+  },
+  {
+   "clip_id": "s04_g49_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s04_g49_blue.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 1,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "39b81379bc7e888ced1fa104004e18f3b94bd3ac3bbdb96a326fabf1c3b3b0cf",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 4,
+   "sha256": "c7063f89cec82ba24020d5f8ddc4e461a5d5ce6aa144ebbfc71683875c5bf0ef",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    8.0,
+    120.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 0,
+   "y0": 160
+  },
+  {
+   "clip_id": "s05_g98_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s05_g98_orange.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 2,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "d3eaecda4148ba18f287d3ce9a6092fe9fb56f81a36e83bcfecf4bbb57e568ab",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 5,
+   "sha256": "6bd8a637aed2e45649fa397d90240f51beecf9880ced6328b20a16f6da7bd7a8",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    81.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 160
+  },
+  {
+   "clip_id": "s05_g98_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s05_g98_blue.mkv",
+   "fps": 30,
+   "g": 9.8,
+   "gravity_idx": 0,
+   "i": 2,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "da819fc687eb1e39f4a00046459361f1107654a4cfa9059cd072614c7eb9b6c4",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 5,
+   "sha256": "55e5b60ad0ce869245a198e050cc0a26521277a84dcf17904977087a7fd5e9f4",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    81.6
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 160
+  },
+  {
+   "clip_id": "s05_g49_orange",
+   "codec": "ffv1",
+   "color": "orange",
+   "color_idx": 0,
+   "container": "matroska",
+   "filename": "videos/s05_g49_orange.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 2,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "cf272b8daad6268e65ae2d5fe242ef9f72778845764b3fec3c8877d87c5eb499",
+   "rgb": [
+    235,
+    100,
+    60
+   ],
+   "scene": 5,
+   "sha256": "4d61c9e7b0d0974500b07fa2b67ead592adf3d116489dfd76dd7efbc4ac83287",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    120.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 160
+  },
+  {
+   "clip_id": "s05_g49_blue",
+   "codec": "ffv1",
+   "color": "blue",
+   "color_idx": 1,
+   "container": "matroska",
+   "filename": "videos/s05_g49_blue.mkv",
+   "fps": 30,
+   "g": 4.9,
+   "gravity_idx": 1,
+   "i": 2,
+   "j": 1,
+   "n_frames": 151,
+   "pix_fmt": "bgr0",
+   "raw_rgb_frames_sha256": "7a841f74a8bbc65c05d8ba40029716d0ab3126fdaae30edcf465efaa44bc6e68",
+   "rgb": [
+    60,
+    140,
+    235
+   ],
+   "scene": 5,
+   "sha256": "aa33270a65abe9342b069e2ff50a23ad433204e5db7303cc3f63702f41b9413b",
+   "size": [
+    384,
+    384
+   ],
+   "target_frame": 120,
+   "target_t4_m": [
+    48.0,
+    120.8
+   ],
+   "timestamps": "k/30 s, k=0..150",
+   "x0": 40,
+   "y0": 160
+  }
+ ],
+ "config_sha256": "c3c8e8c696503056c7d2c64d404c99aed875a00b9c683e7998588287da4e17e6",
+ "generator_code_sha256": "568118133082df092971e86278d9feb82c23c2b7f145547d01c58d5da60a1405",
+ "n_clips": 24,
+ "observed_frame_indices": [
+  0,
+  4,
+  8,
+  12,
+  16,
+  20,
+  24,
+  28,
+  32,
+  36,
+  40,
+  44,
+  48,
+  52,
+  56,
+  60
+ ],
+ "protocol_version": "1.0"
+}

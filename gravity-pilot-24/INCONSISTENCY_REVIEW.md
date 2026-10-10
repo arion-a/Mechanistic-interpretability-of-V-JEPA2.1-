@@ -20,11 +20,15 @@ Method: read both in full; recomputed every stated number with `tools/protocol_c
 |---|---|---|
 | I-05 | Source revision `204698b…` could not be verified from this sandbox (GitHub tree URL returned 403 via proxy). The checkpoint URL does resolve (HTTP 200). | Verify revision + record checkpoint SHA-256 at first download; Stage B only. |
 | I-06 | "EMA encoder" + "strict load" for a **distilled** ViT-B (`..._dist_vitG_384`): it is not stated which state-dict key holds the weights, nor that an EMA copy exists for a distilled student. Also "hierarchical output disabled" depends on the V-JEPA 2.1 code path. | Inspect checkpoint keys & model code at the pinned revision before extraction; if the premise is wrong that is a blocker to report, not to work around. |
-| I-07 | FFV1 pixel format not specified. Default ffmpeg paths convert RGB→YUV, which breaks the required "decoded RGB equality". | Use an RGB-native format (`bgr0` or `gbrp`) and test round-trip equality on all 151×24 frames. |
-| I-08 | Rendering details: grid line width, line draw order vs. ball, Pillow float-bbox rasterisation, Pillow version. | Pin Pillow; 1-px lines, grid under ball; record rendered-frame hashes in manifest. |
+| I-07 | **RESOLVED in Stage A (bgr0).** FFV1 pixel format not specified. Default ffmpeg paths convert RGB→YUV, which breaks the required "decoded RGB equality". | Use an RGB-native format (`bgr0` or `gbrp`) and test round-trip equality on all 151×24 frames. |
+| I-08 | **Pinned in Stage A** (Pillow 12.3.0, 1-px grid under ball). Rendering details: grid line width, line draw order vs. ball, Pillow float-bbox rasterisation, Pillow version. | Pin Pillow; 1-px lines, grid under ball; record rendered-frame hashes in manifest. |
 | I-09 | `Generator.integers` bit-stream is not guaranteed stable across NumPy versions. | Pin NumPy; reference hash for numpy 2.5.3 is in `pilot_config.json` — compare in the eventual environment; the saved `projection.npy` is canonical. |
 | I-10 | Frame source for the encoder: decoded FFV1 vs. in-memory rendered frames. | Decode from the validated FFV1 files (lossless ⇒ identical); log the frame indices. |
 | I-11 | Where the 24-clip approval gate lives in `resume` logic ("code hash, config hash …") — no hash algorithm/scope defined. | SHA-256 over git-tracked source + config; logged in provenance. |
+
+## B2. Found during Stage A implementation
+* **I-15** Matroska stores timestamps in 1-ms ticks, so "timestamps = k/30 s" can only hold to within 0.33 ms in the file container (frame index k is exact: 151 packets, in order). Validation uses a 0.5 ms tolerance; the source-frame index list, not container time, defines encoder input.
+* **I-16** The drawn disc's centroid is quantised by pixel rasterisation: max |error| vs. the analytic centre was 0.566 px (0.295 m), unbiased (mean ≈ 0). My first validation tolerance of 0.5 px was arbitrary and failed; it was replaced by the principled half-pixel-per-axis bound (√2/2 px) plus a separate bias check — not tuned to pass. This pixel-level noise (~0.3 m) is far below the 16.5 m CV baseline but should be remembered if centres are ever read back from pixels.
 
 ## C. Minor / cosmetic
 
