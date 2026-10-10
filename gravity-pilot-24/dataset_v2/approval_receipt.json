@@ -1,0 +1,6 @@
+{
+ "manifest_sha256": "75ea34ed4ce6806bd1d065db80c76dcc6e39cc4422c0a548477813c4b0ebb6ed",
+ "approver": "arion.abhinav@gmail.com (user; explicit chat instruction 'approve the v2 clips and run stage B')",
+ "note": "Dataset v2.0 (confound-reduced, 48 clips) approved after user inspection of gallery/contact sheet.",
+ "approved_utc": "2026-10-10T09:05:22Z"
+}

@@ -4,3 +4,4 @@ third_party/
 results/extract.log
 __pycache__/
 dataset_v2/videos/*.mkv
+results_v2/extract.log
