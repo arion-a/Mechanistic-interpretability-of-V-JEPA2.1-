@@ -1,1 +1,4 @@
 dataset/*.zip
+cache/
+third_party/
+results/extract.log
