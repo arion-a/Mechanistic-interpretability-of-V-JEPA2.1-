@@ -9,7 +9,7 @@ Append-only. One entry per session/decision. Record failures and deviations; nev
 | Environment chosen by user | this cloud sandbox (CPU, Python 3.13, ffmpeg 6.1.1, numpy 2.5.3, Pillow 12.3.0) — chosen 2026-10-10 |
 | Stage A: generate / validate 24 clips, gallery | done (dataset v1.1, manifest SHA-256 `7cef53e3…1f52`; v1.0 clips superseded) |
 | **Dataset approval gate** | **approved 2026-10-10T07:56:53Z** by user, receipt `dataset/approval_receipt.json` |
-| Stage B: extraction, readers, report | **done** — see `results/RESULTS.md` |
+| Stage B: extraction, readers, report | **done** — see `results/RESULTS.md`; dataset v2.0 (confound-reduced) also approved and run: `results_v2/RESULTS_V2.md` |
 
 Primary prediction-retention result: **not met** (E_full 12.17 m, E_projected 22.32 m, bar 16.53 m, ρ 1.834). Colour 24/24 both. See Session 4.
 
@@ -68,6 +68,14 @@ Primary prediction-retention result: **not met** (E_full 12.17 m, E_projected 22
 * **Process:** `pilot.py` and all v1.1 artifacts untouched (their hashes remain valid). `pilot_v2.py extract` refuses (no receipt). The 104 MB of lossless clips are gitignored; regenerate and verify against the manifest.
 * **Not done:** no approval receipt for v2, no inference, no Stage B code for 48 clips / 12 folds yet.
 * **STOP — awaiting user approval of the v2 clips.**
+
+## 2026-10-10 — Session 7: v2 approval and Stage B on dataset v2.0
+* **Approval:** user instruction "approve the v2 clips and run stage B". All 48 clip hashes re-verified, receipt \`dataset_v2/approval_receipt.json\` (manifest \`75ea34ed…b6ed\`) at 2026-10-10T09:05:22Z.
+* **Pre-specification** \`protocol/STAGE_B_V2_PRESPEC.md\` and the v2 code (\`stage_b_v2.py\`, \`report_plots_v2.py\`; diff vs v1.1 code = count generalisation only) were committed (46011b3) before any v2 embedding existed. \`stage_b_v2.py selftest\` passed.
+* **Run:** extract (48 passes, 277 s CPU) → analyze → report; no code edits during the run; provenance code_sha256 \`3dd0b317…f4d2c\`, git_sha 46011b3, same checkpoint (\`848a77c3…\`), revision and projection hash as the pilot.
+* **Result:** primary rule not met (E_full 15.93 m, E_projected 28.33 m, bar 16.53 m, ρ 1.78); colour 48/48 both; full beats both baselines in 7/12 positions, projected 0/12. Full reader's margin over the CV oracle shrank from 26 % (pilot) to 3.6 %. See \`results_v2/RESULTS_V2.md\`.
+* **Defects/deviations:** none in this run; plots checked visually (12-group layout fine). The v1.1 pilot results and the F1 seed sweep remain valid and unchanged.
+* **Not done:** no seed sweep or other dimensions on v2, no significance claims, no further experiments.
 
 ## Entry template
 ```
