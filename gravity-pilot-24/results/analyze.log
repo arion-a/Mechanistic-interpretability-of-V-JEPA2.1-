@@ -1,0 +1,35 @@
+{
+ "E": {
+  "full": 12.16650502836344,
+  "projected": 22.316878868679737,
+  "cv": 16.52817123714676,
+  "prior": 19.6
+ },
+ "rho": {
+  "value": 1.8342883857486605,
+  "null_reason": null,
+  "absolute_change_m": 10.150373840316297
+ },
+ "color_correct": {
+  "full": 24,
+  "projected": 24
+ },
+ "J": {
+  "full": 4.539393222616413,
+  "projected": 14.73046969899425
+ },
+ "decision": {
+  "primary_prediction_retention": {
+   "E_full_lt_bar": true,
+   "E_projected_lt_bar": false,
+   "rho_le_1.10": false,
+   "PASS": false
+  },
+  "selective_accessibility": {
+   "A_full_gt_0.5": true,
+   "deltaA_ge_0.125": false,
+   "PATTERN_HOLDS": false
+  },
+  "no_significance_claims": true
+ }
+}

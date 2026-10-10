@@ -37,7 +37,7 @@ def make_all(res: Path):
     keys = ["full", "projected", "cv", "prior"]
 
     # 1 six-group position RMSE (+ pooled shown apart, computed from pooled squared errors, not an average of groups)
-    fig = _fig(); ax = fig.add_axes([0.08, 0.2, 0.9, 0.68]); _style(ax)
+    fig = _fig(); ax = fig.add_axes([0.08, 0.3, 0.9, 0.6]); _style(ax)
     groups = [str(i) for i in range(6)]
     xs = np.arange(7 + 1.0); xpos = list(range(6)) + [6.9]
     data = {k: [S["group_position_rmse_m"][k][g] for g in groups] + [S["pooled_position_rmse_m"][k]] for k in keys}
@@ -49,8 +49,9 @@ def make_all(res: Path):
         v = data["projected"][i]; ax.text(x - 0.5 * (bw + 0.02), v + 0.4, f"{v:.1f}", ha="center", fontsize=7.5, color=INK)
     ax.set_xticks(xpos); ax.set_xticklabels([f"held-out\nscene {g}" for g in groups] + ["pooled\n(24 clips)"])
     ax.set_ylabel("Euclidean position RMSE at t = 4 s (m)"); ax.set_title("Future-position error by held-out start position", loc="left", fontsize=12)
-    ax.legend(frameon=False, fontsize=8.5, ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.17), labelcolor=INK2)
-    fig.text(0.08, 0.02, NOTE + " Value labels: full and projected only; all values in plot_data/plot1_group_rmse.csv.", fontsize=7, color=INK2)
+    ax.legend(frameon=False, fontsize=8.5, ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.2), labelcolor=INK2)
+    fig.text(0.08, 0.045, NOTE, fontsize=7, color=INK2)
+    fig.text(0.08, 0.015, "Value labels shown for full and projected only; all values in plot_data/plot1_group_rmse.csv.", fontsize=7, color=INK2)
     fig.savefig(res / "plot1_group_position_rmse.png", dpi=170); plt.close(fig)
     _write(pd / "plot1_group_rmse.csv", ["group"] + keys, [[g if g != "pooled" else g] + [data[k][i] for k in keys] for i, g in enumerate(groups + ["pooled"])])
 
@@ -61,7 +62,7 @@ def make_all(res: Path):
         vals = [round(acc[k][g] * 4) for g in groups]
         ax.bar(xs + (j - 0.5) * 0.3, vals, 0.28, color=C[k], label=f"{LAB[k]}: {S['color']['correct_of_24'][k]}/24 correct", zorder=3)
         for x, v in zip(xs + (j - 0.5) * 0.3, vals): ax.text(x, v + 0.07, str(v), ha="center", fontsize=9, color=INK)
-    ax.axhline(2, color=INK2, lw=0.8, ls=(0, (4, 3))); ax.text(5.55, 2.06, "chance (2 of 4)", fontsize=8, color=INK2, ha="right")
+    ax.axhline(2, color=INK2, lw=0.8, ls=(0, (4, 3))); ax.set_xlim(-0.6, 6.4); ax.text(5.62, 2.0, "chance\n(2 of 4)", fontsize=8, color=INK2, ha="left", va="center")
     ax.set_ylim(0, 4.6); ax.set_yticks(range(5)); ax.set_xticks(xs); ax.set_xticklabels([f"held-out\nscene {g}" for g in groups])
     ax.set_ylabel("Colour clips correct (of 4)"); ax.set_title("Orange-vs-blue ridge classifier, held-out start positions", loc="left", fontsize=12)
     ax.legend(frameon=False, fontsize=9, loc="upper center", bbox_to_anchor=(0.5, -0.17), ncol=2, labelcolor=INK2)
@@ -103,7 +104,7 @@ def make_all(res: Path):
     ax.bar([1], [st["projection_matrix_overhead"]], 0.5, bottom=[st["projected_24"]], color=SURF, edgecolor=C["projected"], hatch="////", lw=1.2, zorder=3)
     ax.text(0, st["full_24"] + 1200, f"{st['full_24']:,} B\n(24 × {st['full_per_clip']:,} B)", ha="center", fontsize=9, color=INK)
     ax.text(1, st["projected_24"] + st["projection_matrix_overhead"] + 1200, f"{st['projected_dataset_incl_matrix']:,} B incl. matrix", ha="center", fontsize=9, color=INK)
-    ax.text(1.32, st["projected_24"] / 2 + 600, f"features {st['projected_24']:,} B\n(24 × {st['projected_per_clip']} B)", ha="left", va="center", fontsize=8.5, color=INK)
+    ax.text(1.32, 6500, f"features {st['projected_24']:,} B\n(24 × {st['projected_per_clip']} B)", ha="left", va="center", fontsize=8.5, color=INK)
     ax.text(1.32, st["projected_24"] + st["projection_matrix_overhead"] / 2, f"fixed overhead: projection matrix\n{st['projection_matrix_overhead']:,} B (float32, 16×768)", ha="left", va="center", fontsize=8.5, color=INK2)
     ax.set_xticks([0, 1]); ax.set_xticklabels(["Full embeddings", "Projected embeddings"]); ax.set_xlim(-0.5, 2.6); ax.set_ylim(0, st["full_24"] * 1.15)
     ax.set_ylabel("Stored float32 bytes (24 clips)")

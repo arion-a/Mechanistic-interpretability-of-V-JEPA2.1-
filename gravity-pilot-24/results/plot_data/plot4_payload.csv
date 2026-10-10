@@ -1,0 +1,7 @@
+item,bytes
+full_per_clip,3072
+projected_per_clip,64
+full_24,73728
+projected_24_features,1536
+projection_matrix_overhead,49152
+projected_dataset_incl_matrix,50688

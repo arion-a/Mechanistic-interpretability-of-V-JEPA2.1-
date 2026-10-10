@@ -18,8 +18,8 @@ Method: read both in full; recomputed every stated number with `tools/protocol_c
 
 | ID | Gap | Why it matters / proposed pin |
 |---|---|---|
-| I-05 | Source revision `204698b…` could not be verified from this sandbox (GitHub tree URL returned 403 via proxy). The checkpoint URL does resolve (HTTP 200). | Verify revision + record checkpoint SHA-256 at first download; Stage B only. |
-| I-06 | "EMA encoder" + "strict load" for a **distilled** ViT-B (`..._dist_vitG_384`): it is not stated which state-dict key holds the weights, nor that an EMA copy exists for a distilled student. Also "hierarchical output disabled" depends on the V-JEPA 2.1 code path. | Inspect checkpoint keys & model code at the pinned revision before extraction; if the premise is wrong that is a blocker to report, not to work around. |
+| I-05 | **RESOLVED in Stage B.** `git ls-remote` shows 204698b… is the repo HEAD and the pinned clone checks out to it; checkpoint downloaded (1,664,223,428 B, sha256 `848a77c3…ddf4d`). Earlier: source revision `204698b…` could not be verified from this sandbox (GitHub tree URL returned 403 via proxy). The checkpoint URL does resolve (HTTP 200). | Verify revision + record checkpoint SHA-256 at first download; Stage B only. |
+| I-06 | **RESOLVED in Stage B.** The pinned loader uses key `ema_encoder` for this ViT-B; strict load matched all keys; default forward returns the final post-LayerNorm tokens (norms_block[-1]), shape [1,4608,768] as asserted. Earlier: "EMA encoder" + "strict load" for a **distilled** ViT-B (`..._dist_vitG_384`): it is not stated which state-dict key holds the weights, nor that an EMA copy exists for a distilled student. Also "hierarchical output disabled" depends on the V-JEPA 2.1 code path. | Inspect checkpoint keys & model code at the pinned revision before extraction; if the premise is wrong that is a blocker to report, not to work around. |
 | I-07 | **RESOLVED in Stage A (bgr0).** FFV1 pixel format not specified. Default ffmpeg paths convert RGB→YUV, which breaks the required "decoded RGB equality". | Use an RGB-native format (`bgr0` or `gbrp`) and test round-trip equality on all 151×24 frames. |
 | I-08 | **Pinned in Stage A** (Pillow 12.3.0, 1-px grid under ball). Rendering details: grid line width, line draw order vs. ball, Pillow float-bbox rasterisation, Pillow version. | Pin Pillow; 1-px lines, grid under ball; record rendered-frame hashes in manifest. |
 | I-09 | `Generator.integers` bit-stream is not guaranteed stable across NumPy versions. | Pin NumPy; reference hash for numpy 2.5.3 is in `pilot_config.json` — compare in the eventual environment; the saved `projection.npy` is canonical. |
@@ -29,6 +29,12 @@ Method: read both in full; recomputed every stated number with `tools/protocol_c
 ## B2. Found during Stage A implementation
 * **I-15** Matroska stores timestamps in 1-ms ticks, so "timestamps = k/30 s" can only hold to within 0.33 ms in the file container (frame index k is exact: 151 packets, in order). Validation uses a 0.5 ms tolerance; the source-frame index list, not container time, defines encoder input.
 * **I-16** The drawn disc's centroid is quantised by pixel rasterisation: max |error| vs. the analytic centre was 0.566 px (0.295 m), unbiased (mean ≈ 0). My first validation tolerance of 0.5 px was arbitrary and failed; it was replaced by the principled half-pixel-per-axis bound (√2/2 px) plus a separate bias check — not tuned to pass. This pixel-level noise (~0.3 m) is far below the 16.5 m CV baseline but should be remembered if centres are ever read back from pixels.
+
+## B3. Found during Stage B
+* **I-17** `pilot.py extract/analyze/report` remain unimplemented stubs (editing `pilot.py` would change the generator hash recorded in the approved manifest). Stage B commands live in `stage_b.py` (`selftest`, `extract`, `analyze`, `report`) and enforce the same approval receipt.
+* **I-18** The official hub builder constructs the encoder with `num_frames=64` and `interpolate_rope=True`; the protocol's 16-frame input therefore runs through interpolated RoPE positions. This is the unmodified official path, used as-is and recorded in provenance.
+* **I-19** The checkpoint loaded with `torch.load(weights_only=True)` (no arbitrary unpickling needed). Only the encoder was loaded; the predictor was not.
+* **I-20** Resolution of I-02 in practice: because E_CV < E_prior in every group, the decision bar was E_CV = 16.53 m throughout.
 
 ## C. Minor / cosmetic
 

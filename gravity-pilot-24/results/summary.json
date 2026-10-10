@@ -1,0 +1,215 @@
+{
+ "dataset_manifest_sha256": "7cef53e34ace1c1147e92b79be750efde10d24e9ae794b815d93ec20e4641f52",
+ "protocol": "v1.0 maths on dataset v1.1",
+ "n_clips": 24,
+ "units": "metres for all position errors",
+ "pooled_position_rmse_m": {
+  "full": 12.16650502836344,
+  "projected": 22.316878868679737,
+  "cv": 16.52817123714676,
+  "prior": 19.6
+ },
+ "pooled_xy_rmse_m": {
+  "full": {
+   "x": 8.495094881440092,
+   "y": 8.709604328585955
+  },
+  "projected": {
+   "x": 11.84432303855907,
+   "y": 18.914414984280718
+  },
+  "cv": {
+   "x": 1.160311428702309e-14,
+   "y": 16.52817123714676
+  },
+  "prior": {
+   "x": 0.0,
+   "y": 19.6
+  }
+ },
+ "group_position_rmse_m": {
+  "full": {
+   "0": 7.034481345596825,
+   "1": 9.435332279796548,
+   "2": 14.106591055730469,
+   "3": 17.300028563648077,
+   "4": 7.262409552788422,
+   "5": 14.092698555292733
+  },
+  "projected": {
+   "0": 19.088454955556177,
+   "1": 9.861497064755584,
+   "2": 24.661915634159445,
+   "3": 24.43069923524198,
+   "4": 17.26084048670519,
+   "5": 31.994288482645345
+  },
+  "cv": {
+   "0": 16.528171237146687,
+   "1": 16.528171237146687,
+   "2": 16.528171237146687,
+   "3": 16.528171237146836,
+   "4": 16.528171237146836,
+   "5": 16.528171237146836
+  },
+  "prior": {
+   "0": 19.599999999999998,
+   "1": 19.599999999999998,
+   "2": 19.599999999999998,
+   "3": 19.6,
+   "4": 19.6,
+   "5": 19.6
+  }
+ },
+ "gravity_position_rmse_m": {
+  "full": {
+   "9.8": 12.344504835285944,
+   "4.9": 11.985862070872818
+  },
+  "projected": {
+   "9.8": 18.357705543403153,
+   "4.9": 25.67256925320007
+  },
+  "cv": {
+   "9.8": 20.90666666666686,
+   "4.9": 10.453333333333047
+  },
+  "prior": {
+   "9.8": 19.59999999999999,
+   "4.9": 19.60000000000001
+  }
+ },
+ "baseline_bar_min_E_cv_E_prior_m": 16.52817123714676,
+ "gain_vs_cv_G": {
+  "full": 0.26389284974132865,
+  "projected": -0.350232796386025
+ },
+ "rho_projected_over_full": {
+  "value": 1.8342883857486605,
+  "null_reason": null,
+  "absolute_change_m": 10.150373840316297
+ },
+ "rho_by_fold": {
+  "0": 2.7135554162076834,
+  "1": 1.0451669079923729,
+  "2": 1.748254807751099,
+  "3": 1.4121768149318161,
+  "4": 2.3767374121826887,
+  "5": 2.270274096697356
+ },
+ "breadth_b_r": {
+  "full": {
+   "fraction_groups_beating_both_baselines": 0.8333333333333334,
+   "per_group": {
+    "0": true,
+    "1": true,
+    "2": true,
+    "3": false,
+    "4": true,
+    "5": true
+   }
+  },
+  "projected": {
+   "fraction_groups_beating_both_baselines": 0.16666666666666666,
+   "per_group": {
+    "0": false,
+    "1": true,
+    "2": false,
+    "3": false,
+    "4": false,
+    "5": false
+   }
+  }
+ },
+ "color": {
+  "correct_of_24": {
+   "full": 24,
+   "projected": 24
+  },
+  "accuracy": {
+   "full": 1.0,
+   "projected": 1.0
+  },
+  "recall": {
+   "full": {
+    "orange": 1.0,
+    "blue": 1.0
+   },
+   "projected": {
+    "orange": 1.0,
+    "blue": 1.0
+   }
+  },
+  "confusion_matrix_rows_true_orange_blue_cols_pred_orange_blue": {
+   "full": [
+    [
+     12,
+     0
+    ],
+    [
+     0,
+     12
+    ]
+   ],
+   "projected": [
+    [
+     12,
+     0
+    ],
+    [
+     0,
+     12
+    ]
+   ]
+  },
+  "group_accuracy": {
+   "full": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 1.0,
+    "4": 1.0,
+    "5": 1.0
+   },
+   "projected": {
+    "0": 1.0,
+    "1": 1.0,
+    "2": 1.0,
+    "3": 1.0,
+    "4": 1.0,
+    "5": 1.0
+   }
+  },
+  "delta_A_full_minus_projected": 0.0,
+  "chance_reference": 0.5
+ },
+ "paired_color_sensitivity_J_m": {
+  "full": 4.539393222616413,
+  "projected": 14.73046969899425
+ },
+ "storage_bytes": {
+  "full_per_clip": 3072,
+  "projected_per_clip": 64,
+  "full_24": 73728,
+  "projected_24": 1536,
+  "reduction_factor": 48.0,
+  "percent_fewer_values": 97.91666666666666,
+  "projection_matrix_overhead": 49152,
+  "projected_dataset_incl_matrix": 50688,
+  "note": "payload at float32; not Shannon information; encoder/reader/provenance storage excluded"
+ },
+ "decision": {
+  "primary_prediction_retention": {
+   "E_full_lt_bar": true,
+   "E_projected_lt_bar": false,
+   "rho_le_1.10": false,
+   "PASS": false
+  },
+  "selective_accessibility": {
+   "A_full_gt_0.5": true,
+   "deltaA_ge_0.125": false,
+   "PATTERN_HOLDS": false
+  },
+  "no_significance_claims": true
+ }
+}
