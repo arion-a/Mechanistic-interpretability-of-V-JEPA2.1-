@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" font-family="Segoe UI,Helvetica,Arial,sans-serif">
+<rect width="900" height="430" rx="14" fill="#0f172a"/>
+<defs><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/></marker></defs>
+<text x="450" y="32" fill="#f1f5f9" font-size="19" font-weight="700" text-anchor="middle">Do physical interventions move V-JEPA's representation along a few reusable directions?</text>
+<g font-size="13" text-anchor="middle">
+<rect x="20" y="56" width="200" height="104" rx="10" fill="#1e293b" stroke="#38bdf8"/>
+<text x="120" y="80" fill="#38bdf8" font-weight="700">Paired videos, same 3D world</text>
+<text x="120" y="102" fill="#cbd5e1">baseline: g 9.8, e 0.6, mu 0.2</text><text x="120" y="120" fill="#cbd5e1">intervened: change ONE of</text><text x="120" y="138" fill="#cbd5e1">g, e, mu, or start speed</text>
+<rect x="250" y="56" width="190" height="104" rx="10" fill="#1e293b" stroke="#a78bfa"/>
+<text x="345" y="80" fill="#a78bfa" font-weight="700">Frozen V-JEPA 2.1</text>
+<text x="345" y="102" fill="#cbd5e1">ViT-B/16, 384 pixels</text><text x="345" y="120" fill="#cbd5e1">weights never changed</text><text x="345" y="138" fill="#cbd5e1">one vector per clip</text>
+<rect x="470" y="56" width="190" height="104" rx="10" fill="#1e293b" stroke="#34d399"/>
+<text x="565" y="80" fill="#34d399" font-weight="700">Change in representation</text>
+<text x="565" y="104" fill="#cbd5e1">Δz = E(intervened)</text><text x="565" y="122" fill="#cbd5e1">minus E(baseline)</text><text x="565" y="142" fill="#94a3b8" font-size="12">one Δz per pair</text>
+<rect x="690" y="56" width="190" height="104" rx="10" fill="#1e293b" stroke="#fbbf24"/>
+<text x="785" y="80" fill="#fbbf24" font-weight="700">One subspace Q per factor</text>
+<text x="785" y="104" fill="#cbd5e1">fitted on training worlds</text><text x="785" y="122" fill="#cbd5e1">only, by SVD, rank r</text><text x="785" y="142" fill="#94a3b8" font-size="12">Δz is about Q times a</text>
+</g>
+<g stroke="#94a3b8" stroke-width="2" marker-end="url(#a)" fill="none"><path d="M222 108 H248"/><path d="M442 108 H468"/><path d="M662 108 H688"/></g>
+<text x="450" y="196" fill="#e2e8f0" font-size="14" font-weight="700" text-anchor="middle">Four tests on held-out worlds, in this order (thresholds are planning values, not results)</text>
+<g font-size="13" text-anchor="middle">
+<rect x="20" y="208" width="200" height="96" rx="10" fill="#1e293b" stroke="#475569"/>
+<text x="120" y="232" fill="#f1f5f9" font-weight="700">1. Compact</text><text x="120" y="254" fill="#cbd5e1">rank-8 subspace keeps</text><text x="120" y="272" fill="#cbd5e1">at least 80% of the</text><text x="120" y="290" fill="#cbd5e1">change's energy</text>
+<rect x="250" y="208" width="190" height="96" rx="10" fill="#1e293b" stroke="#475569"/>
+<text x="345" y="232" fill="#f1f5f9" font-weight="700">2. Specific</text><text x="345" y="254" fill="#cbd5e1">each factor's subspace</text><text x="345" y="272" fill="#cbd5e1">beats the other factors'</text><text x="345" y="290" fill="#cbd5e1">by a margin of 0.1</text>
+<rect x="470" y="208" width="190" height="96" rx="10" fill="#1e293b" stroke="#475569"/>
+<text x="565" y="232" fill="#f1f5f9" font-weight="700">3. Transportable</text><text x="565" y="254" fill="#cbd5e1">same subspace, no refit,</text><text x="565" y="272" fill="#cbd5e1">new camera, appearance,</text><text x="565" y="290" fill="#cbd5e1">size: loss at most 0.1</text>
+<rect x="690" y="208" width="190" height="96" rx="10" fill="#1e293b" stroke="#475569"/>
+<text x="785" y="232" fill="#f1f5f9" font-weight="700">4. Predictive</text><text x="785" y="254" fill="#cbd5e1">predict the changed clip's</text><text x="785" y="272" fill="#cbd5e1">vector: 10% less error</text><text x="785" y="290" fill="#cbd5e1">than "no change"</text>
+</g>
+<g stroke="#94a3b8" stroke-width="2" marker-end="url(#a)" fill="none"><path d="M222 256 H248"/><path d="M442 256 H468"/><path d="M662 256 H688"/></g>
+<text x="450" y="332" fill="#cbd5e1" font-size="13" text-anchor="middle">Planned data: 1,200 simulated worlds (720 train, 240 validation, 240 test), 9 videos each. 16,560 clips in total with shifted domains.</text>
+<rect x="20" y="352" width="860" height="56" rx="10" fill="#422006" stroke="#fbbf24"/>
+<text x="450" y="376" fill="#fde68a" font-size="14" font-weight="700" text-anchor="middle">Status: written protocol only. No code has been run and there are no results.</text>
+<text x="450" y="396" fill="#fde68a" font-size="12" text-anchor="middle">A second, separate proposal (a small JEPA trained from scratch, scored by ARS) is described in the README.</text>
+</svg>
