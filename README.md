@@ -16,7 +16,7 @@
 | Planned data | Pilot of 120 worlds; main study 1,200 worlds (720 train, 240 validation, 240 test), 9 videos each; 16,560 clips with shifted domains | Pilot 5,000 clips; 20,000 clips per dataset replica; 500 test groups x 3 laws x 5 replicas |
 | Main measures | Subspace retention, specificity margin, transport loss, error reduction over "no change" | Abstraction Recovery Score ARS = (L_S - L_J) / (L_S - L_O), compared with a state-only baseline and an oracle |
 | Planning thresholds | Held-out rank-8 retention at least 0.8; specificity margin at least 0.1; transport loss at most 0.1; at least 10% error reduction over identity | ARS lower 95% bound above 0.20 with a valid gap, and a positive frozen-transfer gain |
-| Documents | `01_3D_VJEPA_Research_Agenda.docx`, `02_3D_VJEPA_Mathematical_Framework.docx` | `docs/jepa-abstraction-experiment/` (four Markdown memos) |
+| Documents | `01_3D_VJEPA_Research_Agenda.docx`, `02_3D_VJEPA_Mathematical_Framework.docx` | `docs/jepa-abstraction-experiment/` (three Markdown memos) |
 
 All thresholds and sizes are **proposed defaults**. The documents say they must be frozen after a pilot and before the test set is opened.
 
@@ -25,7 +25,7 @@ All thresholds and sizes are **proposed defaults**. The documents say they must 
 | Category | Done | Pending (planned) | Not planned (gap) |
 | --- | --- | --- | --- |
 | **1. Research design, proposal 1** | Research agenda and mathematical framework written (research questions, estimands, null hypotheses, decision rules) | Freeze the design after the pilot | Amendment of the 1,200-world budget to a pilot-based power estimate is stated but not done |
-| **2. Research design, proposal 2** | Four memos written: experiment plan, coding-agent instructions, stepwise execution plan, reporting specification | Freeze the Stage A-E definitions after the pilot | Companion files named in the memos (DOCX versions, XLSX dashboard, CSV templates, configuration contracts, reference utilities) are not in this repository |
+| **2. Research design, proposal 2** | Three memos written: experiment plan, stepwise execution plan, reporting specification | Freeze the Stage A-E definitions after the pilot | Companion files named in the memos (DOCX versions, XLSX dashboard, CSV templates, configuration contracts, reference utilities) are not in this repository |
 | **3. Simulator and data** | - | Proposal 1: calibrate restitution and friction, 120-world pilot, 1,200-world main set. Proposal 2: matched-state generation, 5,000-clip pilot, 20,000-clip pretraining sets | No simulator code, no configuration files, no dataset manifests |
 | **4. Model and feature extraction** | - | Proposal 1: load and check the pinned V-JEPA 2.1 checkpoint (milestone M0), extract final-layer features. Proposal 2: train the small JEPA, variants and baselines | No code, no pinned environment |
 | **5. Analysis and statistics** | Methods specified: SVD subspaces, retention, specificity matrix, transport, matched-effect and null controls, ridge counterfactual operator, ARS, paired bootstrap, Holm correction | Run all of it after data exists | Power analysis from pilot variance is specified but not done |
@@ -41,7 +41,6 @@ All thresholds and sizes are **proposed defaults**. The documents say they must 
 | `01_3D_VJEPA_Research_Agenda.docx` | Proposal 1: purpose, research questions RQ1-RQ4, world and interventions, dataset, analysis, decision rules, work packages M0-M4 |
 | `02_3D_VJEPA_Mathematical_Framework.docx` | Proposal 1: definitions and estimands (paired interventions, SVD subspaces, specificity, transport, counterfactual operator), assumptions, null hypotheses |
 | `docs/jepa-abstraction-experiment/01_Research_Experiment_Plan.md` | Proposal 2: hypotheses H1-H5, world, JEPA model, ARS, Stage A-E matrix |
-| `docs/jepa-abstraction-experiment/02_Coding_Agent_Instructions.md` | Proposal 2: roles, inputs and outputs, configuration, seeds, tests, failure handling |
 | `docs/jepa-abstraction-experiment/03_Stepwise_Execution_Plan.md` | Proposal 2: phases, checkpoints, evidence requirements, go/no-go decisions |
 | `docs/jepa-abstraction-experiment/04_Results_and_Data_Reporting_Specification.md` | Proposal 2: metrics, tables, plots, confidence intervals, dashboard design |
 

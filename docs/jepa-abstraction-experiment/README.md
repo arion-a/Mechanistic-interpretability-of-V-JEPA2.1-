@@ -5,9 +5,8 @@
 ## Documents
 
 1. [Research Experiment Plan](01_Research_Experiment_Plan.md) — hypotheses, simulator, JEPA variants, behavioral metrics, controls, Stage A–E matrix, statistics and risks.
-2. [Coding Agent Instructions](02_Coding_Agent_Instructions.md) — roles, inputs/outputs, configuration, seeds, tests, failure handling and handoffs.
-3. [Stepwise Execution Plan](03_Stepwise_Execution_Plan.md) — phases, checkpoints, evidence requirements and go/no-go decisions.
-4. [Results & Data Reporting Specification](04_Results_and_Data_Reporting_Specification.md) — metrics, metadata, tables, plots, confidence intervals, dashboard design and result-reporting templates.
+2. [Stepwise Execution Plan](03_Stepwise_Execution_Plan.md) — phases, checkpoints, evidence requirements and go/no-go decisions.
+3. [Results & Data Reporting Specification](04_Results_and_Data_Reporting_Specification.md) — metrics, metadata, tables, plots, confidence intervals, dashboard design and result-reporting templates.
 
 ## Scope and status
 
